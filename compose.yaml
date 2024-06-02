@@ -1,0 +1,37 @@
+services:
+  chat-app-nginx:
+    image: nginx:latest
+    container_name: chat-app-nginx
+    volumes:
+      - ./default.conf:/etc/nginx/conf.d/default.conf
+    ports:
+      - "80:80"
+    depends_on:
+      - chat-app-backend
+      - chat-app-frontend
+  chat-app-backend:
+    image: chat-app-backend:latest
+    container_name: chat-app-backend
+    ports:
+      - "8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://chat-app-db:3306/edu?useSSL=false&allowPublicKeyRetrieval=true
+    depends_on:
+      - chat-app-db
+    restart: always
+  chat-app-db:
+    image: mysql:latest
+    container_name: chat-app-db
+    ports:
+      - "3306:3306"
+    environment:
+      - MYSQL_ROOT_USER=root
+      - MYSQL_ROOT_PASSWORD=1234
+      - MYSQL_DATABASE=edu
+  chat-app-frontend:
+    image: chat-app-frontend:latest
+    container_name: chat-app-frontend
+    ports:
+      - "80"
+    environment:
+      - WDS_SOCKET_PORT=0
