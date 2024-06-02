@@ -9,6 +9,7 @@ Chat App using Websocket
 
 ### 2. Create SpringBoot App Image
 + git clone https://github.com/chrismrkr/chat-app.git
++ Build Jar File : ./gradlew clean build -x test 
 + Build Image with Dockerfile : ```docker build -t chat-app-backend ./```
 
 ### 3. Run in Docker Compose
