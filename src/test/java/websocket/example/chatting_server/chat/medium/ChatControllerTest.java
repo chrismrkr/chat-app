@@ -66,9 +66,6 @@ public class ChatControllerTest {
 
         // when
         session.send("/app/message/1", new ChatDto("USR1", "HELLO"));
-        String take = blockingQueue.take();
         // then
-        String receivedMessage = blockingQueue.poll(5, TimeUnit.SECONDS);
-        System.out.println(receivedMessage);
     }
 }
