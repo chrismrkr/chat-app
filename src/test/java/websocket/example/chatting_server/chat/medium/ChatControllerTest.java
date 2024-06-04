@@ -20,14 +20,8 @@ import websocket.example.chatting_server.chat.config.WebSocketConfig;
 import websocket.example.chatting_server.chat.controller.dto.ChatDto;
 
 import java.lang.reflect.Type;
-import java.util.Base64;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingDeque;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.TimeUnit;
+import java.util.*;
+import java.util.concurrent.*;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -37,7 +31,7 @@ public class ChatControllerTest {
     @Autowired
     WebSocketConfig webSocketConfig;
     WebSocketStompClient stompClient;
-    BlockingQueue<String> blockingQueue;
+    BlockingQueue<ChatDto> blockingQueue;
 
     @BeforeEach
     void setup() {
@@ -47,7 +41,7 @@ public class ChatControllerTest {
     }
 
     @Test
-    public void testWebSocketConnection() throws Exception {
+    public void 싱글스레드_웹소켓_통신() throws Exception {
         // given
         StompSession session = stompClient
                 .connect("ws://localhost:" + port + "/ws",
@@ -56,16 +50,52 @@ public class ChatControllerTest {
         session.subscribe("/chatroom/1", new StompFrameHandler() {
             @Override
             public Type getPayloadType(StompHeaders headers) {
-                return String.class;
+                return ChatDto.class;
             }
             @Override
             public void handleFrame(StompHeaders headers, Object payload) {
-                blockingQueue.offer((String) payload);
+                blockingQueue.offer((ChatDto) payload);
             }
         });
 
         // when
         session.send("/app/message/1", new ChatDto("USR1", "HELLO"));
         // then
+        ChatDto poll = blockingQueue.poll(2, TimeUnit.SECONDS);
+        Assertions.assertEquals(poll.getMessage(), "HELLO");
+        Assertions.assertEquals(poll.getSenderName(), "USR1");
+    }
+
+    @Test
+    public void 멀티스레드_웹소켓_통신() throws Exception {
+      // given
+        int threadCount = 10;
+//        ExecutorService executorService = Executors.newFixedThreadPool(threadCount);
+//        CountDownLatch countDownLatch = new CountDownLatch(threadCount);
+        List<StompSession> sessionList = new ArrayList<>();
+        for(int i=0; i<threadCount; i++) {
+            StompSession session = stompClient
+                    .connect("ws://localhost:" + port + "/ws",
+                            new StompSessionHandlerAdapter() {
+                            }).get(1, TimeUnit.SECONDS);
+            session.subscribe("/chatroom/1", new StompFrameHandler() {
+                @Override
+                public Type getPayloadType(StompHeaders headers) {
+                    return ChatDto.class;
+                }
+                @Override
+                public void handleFrame(StompHeaders headers, Object payload) {
+                    blockingQueue.offer((ChatDto) payload);
+                }
+            });
+            sessionList.add(session);
+        }
+        Thread.sleep(1000);
+        // when
+        sessionList.get(3).send("/app/message/1", new ChatDto("USR1", "HELLO"));
+        // then
+        ChatDto poll = blockingQueue.poll(2, TimeUnit.SECONDS);
+        Assertions.assertEquals(poll.getMessage(), "HELLO");
+        Assertions.assertEquals(poll.getSenderName(), "USR1");
     }
 }
