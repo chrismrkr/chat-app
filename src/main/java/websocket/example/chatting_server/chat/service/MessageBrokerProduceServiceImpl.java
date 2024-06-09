@@ -2,15 +2,16 @@ package websocket.example.chatting_server.chat.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import websocket.example.chatting_server.chat.controller.dto.ChatDto;
-import websocket.example.chatting_server.chat.controller.port.MessageBrokerProducerService;
+import websocket.example.chatting_server.chat.controller.port.MessageBrokerProduceService;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class MessageBrokerProducerServiceImpl implements MessageBrokerProducerService {
+public class MessageBrokerProduceServiceImpl implements MessageBrokerProduceService {
     private final KafkaTemplate<String, ChatDto> kafkaTemplate;
     @Override
     public void sendMessage(String topic, ChatDto chatDto) {

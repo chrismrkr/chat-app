@@ -7,6 +7,7 @@ import lombok.*;
 @AllArgsConstructor
 @Getter
 public class ChatDto {
+    private Long roomId;
     private String senderName;
     private String message;
 }
