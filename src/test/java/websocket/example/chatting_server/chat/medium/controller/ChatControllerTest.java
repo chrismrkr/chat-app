@@ -15,6 +15,7 @@ import org.springframework.messaging.simp.stomp.StompSessionHandlerAdapter;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.web.socket.client.standard.StandardWebSocketClient;
 import org.springframework.web.socket.messaging.WebSocketStompClient;
+import websocket.example.chatting_server.chat.config.RabbitMQMessageBrokerConfig;
 import websocket.example.chatting_server.chat.config.WebSocketConfig;
 import websocket.example.chatting_server.chat.controller.dto.ChatDto;
 
@@ -29,6 +30,8 @@ public class ChatControllerTest {
     int port;
     @Autowired
     WebSocketConfig webSocketConfig;
+    @Autowired
+    RabbitMQMessageBrokerConfig rabbitMQMessageBrokerConfig;
     WebSocketStompClient stompClient;
     BlockingQueue<ChatDto> blockingQueue;
 
@@ -46,7 +49,8 @@ public class ChatControllerTest {
                 .connect("ws://localhost:" + port + "/ws",
                         new StompSessionHandlerAdapter() {
                         }).get(10, TimeUnit.SECONDS);
-        session.subscribe("/chatroom/1", new StompFrameHandler() {
+        session.subscribe("/exchange/chat.exchange/roomId.1", new StompFrameHandler() {
+//        session.subscribe("/chatroom/1", new StompFrameHandler() {
             @Override
             public Type getPayloadType(StompHeaders headers) {
                 return ChatDto.class;
@@ -59,7 +63,7 @@ public class ChatControllerTest {
 
         // when
         String roomId = "1";
-        session.send("/app/message/" + roomId, new ChatDto(null, "USR1", "HELLO"));
+        session.send("/app/message/" + roomId, new ChatDto(Long.parseLong(roomId), "USR1", "HELLO"));
         // then
         ChatDto poll = blockingQueue.poll(10, TimeUnit.SECONDS);
         Assertions.assertEquals(poll.getRoomId(), 1L);
@@ -79,7 +83,8 @@ public class ChatControllerTest {
                     .connect("ws://localhost:" + port + "/ws",
                             new StompSessionHandlerAdapter() {
                             }).get(10, TimeUnit.SECONDS);
-            session.subscribe("/chatroom/1", new StompFrameHandler() {
+            session.subscribe("/exchange/chat.exchange/roomId.2", new StompFrameHandler() {
+//            session.subscribe("/chatroom/1", new StompFrameHandler() {
                 @Override
                 public Type getPayloadType(StompHeaders headers) {
                     return ChatDto.class;
@@ -93,11 +98,11 @@ public class ChatControllerTest {
         }
         Thread.sleep(1000);
         // when
-        String roomId = "1";
-        sessionList.get(3).send("/app/message/" + roomId, new ChatDto(null, "USR1", "HELLO"));
+        String roomId = "2";
+        sessionList.get(3).send("/app/message/" + roomId, new ChatDto(Long.parseLong(roomId), "USR1", "HELLO"));
         // then
         ChatDto poll = blockingQueue.poll(10, TimeUnit.SECONDS);
-        Assertions.assertEquals(poll.getRoomId(), 1L);
+        Assertions.assertEquals(poll.getRoomId(), 2L);
         Assertions.assertEquals(poll.getMessage(), "HELLO");
         Assertions.assertEquals(poll.getSenderName(), "USR1");
     }

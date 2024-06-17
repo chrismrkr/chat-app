@@ -1,6 +1,7 @@
 package websocket.example.chatting_server.chat.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -13,17 +14,26 @@ import websocket.example.chatting_server.chat.controller.port.MessageBrokerProdu
 @RequiredArgsConstructor
 @CrossOrigin(origins = "*")
 public class ChatController {
-    @Value("${spring.kafka.consumer.topic-name}")
-    private String topic;
-    private final MessageBrokerProduceService messageBrokerProduceService;
+    private final RabbitTemplate rabbitMQTemplate;
+
     @MessageMapping("/message/{roomId}") // pub : /app/message/{roomId}
     public void sendToMessageBroker(@RequestBody ChatDto chatDto, @DestinationVariable String roomId) throws Exception {
         ChatDto dto = new ChatDto(Long.parseLong(roomId), chatDto.getSenderName(), chatDto.getMessage());
-        messageBrokerProduceService.sendMessage(topic, dto);
+        rabbitMQTemplate.convertAndSend("chat.exchange", "roomId."+roomId, dto);
     }
 
-    @SendTo("/chatroom/{roomId}")  // sub
-    public ChatDto publish(@RequestBody ChatDto chatDto, @DestinationVariable String roomId) throws Exception {
-        return new ChatDto(Long.parseLong(roomId), chatDto.getSenderName(), chatDto.getMessage());
-    }
+//    Kafka 사용 시 사용
+//    @Value("${spring.kafka.consumer.topic-name}")
+//    private String topic;
+//    private final MessageBrokerProduceService messageBrokerProduceService;
+//    @MessageMapping("/message/{roomId}") // pub : /app/message/{roomId}
+//    public void sendToMessageBroker(@RequestBody ChatDto chatDto, @DestinationVariable String roomId) throws Exception {
+//        ChatDto dto = new ChatDto(Long.parseLong(roomId), chatDto.getSenderName(), chatDto.getMessage());
+//        messageBrokerProduceService.broadcastToCluster(topic, dto);
+//    }
+//
+//    @SendTo("/chatroom/{roomId}")  // sub
+//    public ChatDto subscribe(@RequestBody ChatDto chatDto, @DestinationVariable String roomId) throws Exception {
+//        return new ChatDto(Long.parseLong(roomId), chatDto.getSenderName(), chatDto.getMessage());
+//    }
 }

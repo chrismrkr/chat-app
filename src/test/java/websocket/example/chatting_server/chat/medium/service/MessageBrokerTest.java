@@ -60,7 +60,7 @@ public class MessageBrokerTest {
         // when
         String topic = "chat-topic";
         ChatDto chatDto = new ChatDto(1L, "USR1","Hello Everyone");
-        messageBrokerProduceService.sendMessage(topic, chatDto);
+        messageBrokerProduceService.broadcastToCluster(topic, chatDto);
         // then
         ChatDto poll = blockingQueue.poll(10, TimeUnit.SECONDS);
         Assertions.assertNotNull(poll);
@@ -96,7 +96,7 @@ public class MessageBrokerTest {
         // when
         String topic = "chat-topic";
         ChatDto chatDto = new ChatDto(2L, "USR1","Hello Everyone");
-        messageBrokerProduceService.sendMessage(topic, chatDto);
+        messageBrokerProduceService.broadcastToCluster(topic, chatDto);
         // then
         for(int i=0; i<threadCount; i++) {
             ChatDto poll = blockingQueue.poll(10, TimeUnit.SECONDS);

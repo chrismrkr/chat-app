@@ -7,18 +7,59 @@ services:
     ports:
       - "80:80"
     depends_on:
-      - chat-app-backend
+      - chat-app-backend1
+      - chat-app-backend2
       - chat-app-frontend
-  chat-app-backend:
+
+  chat-app-backend1:
     image: chat-app-backend:latest
-    container_name: chat-app-backend
+    container_name: chat-app-backend1
     ports:
       - "8080"
     environment:
       SPRING_DATASOURCE_URL: jdbc:mysql://chat-app-db:3306/edu?useSSL=false&allowPublicKeyRetrieval=true
+      SPRING_RABBITMQ_HOST: chat-app-rabbitmq
+      SPRING_RABBITMQ_PORT: 5672
+      SPRING_RABBITMQ_USERNAME: guest
+      SPRING_RABBITMQ_PASSWORD: guest
+
     depends_on:
       - chat-app-db
+      - chat-app-rabbitmq
     restart: always
+
+  chat-app-backend2:
+    image: chat-app-backend:latest
+    container_name: chat-app-backend2
+    ports:
+      - "8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://chat-app-db:3306/edu?useSSL=false&allowPublicKeyRetrieval=true
+      SPRING_RABBITMQ_HOST: chat-app-rabbitmq
+      SPRING_RABBITMQ_AMQP-PORT: 5672
+      SPRING_RABBITMQ_RELAY-PORT: 61613
+      SPRING_RABBITMQ_USERNAME: guest
+      SPRING_RABBITMQ_PASSWORD: guest
+    depends_on:
+      - chat-app-db
+      - chat-app-rabbitmq
+    restart: always
+
+  chat-app-rabbitmq:
+    image: rabbitmq:3-management
+    container_name: chat-app-rabbitmq
+    ports:
+      - "5672"
+      - "15672:15672"
+      - "61613"
+    environment:
+      RABBITMQ_STOMP_LISTEN_PORT: 61613
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+      RABBITMQ_DEFAULT_VHOST: /
+    command: >
+      sh -c "rabbitmq-plugins enable rabbitmq_stomp && rabbitmq-server"
+
   chat-app-db:
     image: mysql:latest
     container_name: chat-app-db
@@ -28,6 +69,7 @@ services:
       - MYSQL_ROOT_USER=root
       - MYSQL_ROOT_PASSWORD=1234
       - MYSQL_DATABASE=edu
+
   chat-app-frontend:
     image: chat-app-frontend:latest
     container_name: chat-app-frontend
@@ -35,3 +77,5 @@ services:
       - "80"
     environment:
       - WDS_SOCKET_PORT=0
+
+

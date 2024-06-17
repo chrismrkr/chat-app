@@ -18,15 +18,15 @@ import websocket.example.chatting_server.chat.controller.dto.ChatDto;
 import java.util.HashMap;
 import java.util.Map;
 
-@Configuration
+//@Configuration
 @RequiredArgsConstructor
-public class MessageBrokerConfig {
+public class KafkaMessageBrokerConfig {
     private final Environment environment;
-    @Bean
+//    @Bean
     public KafkaTemplate<String, ChatDto> kafkaTemplate() {
         return new KafkaTemplate<>(producerFactory());
     }
-    @Bean
+//    @Bean
     public ProducerFactory<String, ChatDto> producerFactory() {
         // Producer : Topic, Partition
         Map<String, Object> configProps = new HashMap<>();
@@ -35,13 +35,13 @@ public class MessageBrokerConfig {
         configProps.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
         return new DefaultKafkaProducerFactory<>(configProps);
     }
-    @Bean
+//    @Bean
     public ConcurrentKafkaListenerContainerFactory<String, ChatDto> kafkaListenerContainerFactory() {
         ConcurrentKafkaListenerContainerFactory<String, ChatDto> factory = new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(consumerFactory());
         return factory;
     }
-    @Bean
+//    @Bean
     public ConsumerFactory<String, ChatDto> consumerFactory() {
         Map<String, Object> props = new HashMap<>();
         props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, environment.getProperty("spring.kafka.consumer.bootstrap-servers"));
