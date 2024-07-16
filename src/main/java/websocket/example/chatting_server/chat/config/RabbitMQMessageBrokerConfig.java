@@ -10,6 +10,7 @@ import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -18,6 +19,7 @@ import org.springframework.core.env.Environment;
 @Configuration
 @EnableRabbit
 public class RabbitMQMessageBrokerConfig {
+    // env(properties 파일)에서 가져오는 방식으로 설정 변경하기
     private static final String CHAT_QUEUE_NAME = "chat.queue";
     private static final String CHAT_EXCHANGE_NAME = "chat.exchange";
     private static final String ROUTING_KEY = "room.*";
@@ -32,18 +34,21 @@ public class RabbitMQMessageBrokerConfig {
 
     //Queue 등록
     @Bean
-    public Queue queue() {
+    @Qualifier("chatQueue")
+    public Queue chatQueue() {
         return new Queue(CHAT_QUEUE_NAME, true);
     }
 
     //Exchange 등록
     @Bean
-    public TopicExchange exchange() {
+    @Qualifier("chatExchange")
+    public TopicExchange chatExchange() {
         return new TopicExchange(CHAT_EXCHANGE_NAME);
     }
 
-    // Exchange와 Queue 바인딩
+    // chatExchange와 chatQueue 바인딩
     @Bean
+    @Qualifier("chatBinding")
     public Binding binding(Queue queue, TopicExchange exchange){
         return BindingBuilder
                 .bind(queue)

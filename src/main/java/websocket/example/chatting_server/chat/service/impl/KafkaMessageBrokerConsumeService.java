@@ -1,11 +1,10 @@
-package websocket.example.chatting_server.chat.service;
+package websocket.example.chatting_server.chat.service.impl;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import websocket.example.chatting_server.chat.controller.dto.ChatDto;
-import websocket.example.chatting_server.chat.controller.port.MessageBrokerConsumeService;
+import websocket.example.chatting_server.chat.service.MessageBrokerConsumeService;
 
 @Service
 @RequiredArgsConstructor

@@ -1,4 +1,4 @@
-package websocket.example.chatting_server.chat.controller.port;
+package websocket.example.chatting_server.chat.service;
 
 import websocket.example.chatting_server.chat.controller.dto.ChatDto;
 

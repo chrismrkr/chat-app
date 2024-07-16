@@ -16,7 +16,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.web.socket.client.standard.StandardWebSocketClient;
 import org.springframework.web.socket.messaging.WebSocketStompClient;
 import websocket.example.chatting_server.chat.controller.dto.ChatDto;
-import websocket.example.chatting_server.chat.controller.port.MessageBrokerProduceService;
+import websocket.example.chatting_server.chat.service.MessageBrokerProduceService;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
