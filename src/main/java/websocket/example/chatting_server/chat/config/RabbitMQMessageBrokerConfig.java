@@ -19,10 +19,12 @@ import org.springframework.core.env.Environment;
 @Configuration
 @EnableRabbit
 public class RabbitMQMessageBrokerConfig {
-    // env(properties 파일)에서 가져오는 방식으로 설정 변경하기
-    private static final String CHAT_QUEUE_NAME = "chat.queue";
-    private static final String CHAT_EXCHANGE_NAME = "chat.exchange";
-    private static final String ROUTING_KEY = "room.*";
+    @Value("${spring.rabbitmq.chat.queue-name}")
+    private String CHAT_QUEUE_NAME;
+    @Value("${spring.rabbitmq.chat.exchange-name}")
+    private String CHAT_EXCHANGE_NAME;
+    @Value("${spring.rabbitmq.chat.binding-key}")
+    private String BINDING_KEY;
     @Value("${spring.rabbitmq.host}")
     private String rabbitmqHost;
     @Value("${spring.rabbitmq.amqp-port}")
@@ -53,7 +55,7 @@ public class RabbitMQMessageBrokerConfig {
         return BindingBuilder
                 .bind(queue)
                 .to(exchange)
-                .with(ROUTING_KEY);
+                .with(BINDING_KEY);
     }
 
     // RabbitMQ와의 메시지 통신을 담당하는 클래스

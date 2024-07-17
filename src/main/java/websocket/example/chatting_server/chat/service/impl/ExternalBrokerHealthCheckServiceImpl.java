@@ -22,11 +22,12 @@ public class ExternalBrokerHealthCheckServiceImpl implements ExternalBrokerHealt
     @PostConstruct
     @Override
     public void start() {
-        threadPoolTaskScheduler.scheduleWithFixedDelay(() -> {
-            /* impl external broker health check
-            ** 1. Do health check
-            *  2. Send health check result To User
-            */
-        }, Duration.ofMillis(20000));
+//        threadPoolTaskScheduler.scheduleWithFixedDelay(() -> {
+//            /* Impl external broker health check
+//            ** 1. Do health check
+//            ** 2. Send health check result To User
+//            */
+//            rabbitTemplate.convertAndSend();
+//        }, Duration.ofMillis(20000));
     }
 }
