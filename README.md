@@ -22,3 +22,8 @@ Chat App using Websocket
 + RabbitMQ(External Broker)를 통해 클라이언트가 메세지를 Subscribe할 수 있도록 변경함
 + 이에 따라 웹 소켓 컨테이너 Scale-out이 가능함
 
+## 2024.07.19 Update
++ 헬스 체크 기능 구현
+  + Server - Client 헬스 체크: StompClient 내장 heartbeat 및 reconnectDelay 기능 활용
+  + Server - External Broker 헬스 체크: TaskScheduler를 활용한 External Broker 상태 점검 후 결과 Client에 broadcast
+
