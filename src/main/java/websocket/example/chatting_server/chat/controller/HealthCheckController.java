@@ -2,6 +2,7 @@ package websocket.example.chatting_server.chat.controller;
 
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.core.env.Environment;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -24,7 +25,7 @@ public class HealthCheckController {
         Long delayMillis = Long.parseLong(
                 env.getProperty("spring.rabbitmq.healthcheck.delay-millis")
         );
-        
+
         taskSchedulerService.start(() -> {
             rabbitTemplate.convertAndSend(queue, "");
         }, Duration.ofMillis(delayMillis));
