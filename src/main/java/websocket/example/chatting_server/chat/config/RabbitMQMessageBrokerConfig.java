@@ -1,10 +1,7 @@
 package websocket.example.chatting_server.chat.config;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.amqp.core.Binding;
-import org.springframework.amqp.core.BindingBuilder;
-import org.springframework.amqp.core.Queue;
-import org.springframework.amqp.core.TopicExchange;
+import org.springframework.amqp.core.*;
 import org.springframework.amqp.rabbit.annotation.EnableRabbit;
 import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
@@ -25,6 +22,10 @@ public class RabbitMQMessageBrokerConfig {
     private String CHAT_EXCHANGE_NAME;
     @Value("${spring.rabbitmq.chat.binding-key}")
     private String BINDING_KEY;
+    @Value("${spring.rabbitmq.healthcheck.queue-name}")
+    private String HEALTH_CHECK_QUEUE_NAME;
+    @Value("${spring.rabbitmq.healthcheck.exchange-name}")
+    private String HEALTH_CHECK_EXCHANGE_NAME;
     @Value("${spring.rabbitmq.host}")
     private String rabbitmqHost;
     @Value("${spring.rabbitmq.amqp-port}")
@@ -34,28 +35,41 @@ public class RabbitMQMessageBrokerConfig {
     @Value("${spring.rabbitmq.password}")
     private String rabbitmqPassword;
 
-    //Queue 등록
     @Bean
     @Qualifier("chatQueue")
     public Queue chatQueue() {
         return new Queue(CHAT_QUEUE_NAME, true);
     }
-
-    //Exchange 등록
     @Bean
     @Qualifier("chatExchange")
     public TopicExchange chatExchange() {
         return new TopicExchange(CHAT_EXCHANGE_NAME);
     }
-
-    // chatExchange와 chatQueue 바인딩
     @Bean
     @Qualifier("chatBinding")
-    public Binding binding(Queue queue, TopicExchange exchange){
+    public Binding chatbinding(@Qualifier("chatQueue") Queue queue, @Qualifier("chatExchange") TopicExchange exchange) {
         return BindingBuilder
                 .bind(queue)
                 .to(exchange)
                 .with(BINDING_KEY);
+    }
+
+    @Bean
+    @Qualifier("healthCheckQueue")
+    public Queue healthCheckQueue() {
+        return new Queue(HEALTH_CHECK_QUEUE_NAME, true);
+    }
+    @Bean
+    @Qualifier("healthCheckExchange")
+    public FanoutExchange healthCheckExchange() {
+        return new FanoutExchange(HEALTH_CHECK_EXCHANGE_NAME);
+    }
+    @Bean
+    @Qualifier("healthCheckBinding")
+    public Binding healthCheckBinding(@Qualifier("healthCheckQueue") Queue queue, @Qualifier("healthCheckExchange") FanoutExchange exchange) {
+        return BindingBuilder
+                .bind(queue)
+                .to(exchange);
     }
 
     // RabbitMQ와의 메시지 통신을 담당하는 클래스

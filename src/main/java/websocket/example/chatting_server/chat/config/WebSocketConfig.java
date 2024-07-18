@@ -25,13 +25,17 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 //        // Kafka 사용
 //        config.setApplicationDestinationPrefixes("/app");
 //        config.enableSimpleBroker("/chatroom");
-
+        // external broker
         config.setApplicationDestinationPrefixes("/app");
         config.enableStompBrokerRelay("/exchange")
                 .setRelayHost(rabbitmqHost)
                 .setRelayPort(rabbitmqPort)
                 .setClientLogin(rabbitmqUsername)
                 .setClientPasscode(rabbitmqPassword);
+
+        // internal broker
+        config.enableSimpleBroker("/user");
+        config.setUserDestinationPrefix("/user");
 
     }
 
