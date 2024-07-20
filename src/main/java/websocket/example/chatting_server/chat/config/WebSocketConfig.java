@@ -34,9 +34,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                 .setClientPasscode(rabbitmqPassword);
 
         // internal broker
-        config.enableSimpleBroker("/user");
-        config.setUserDestinationPrefix("/user");
-
+        config.enableSimpleBroker("/internal");
     }
 
     @Override

@@ -43,7 +43,7 @@ public class HealthCheckControllerTest {
     @Test
     void ExternalBroker가_정상이면_헬스체크를_주기적으로_받는다() throws ExecutionException, InterruptedException, TimeoutException {
         // given
-        String healthCheckDestination = "/user/broadcast/healthcheck";
+        String healthCheckDestination = "/internal/healthcheck";
         StompSession session = stompClient
                 .connect("ws://localhost:" + port + "/ws",
                         new StompSessionHandlerAdapter() {
@@ -59,7 +59,6 @@ public class HealthCheckControllerTest {
             }
         });
         // when
-        AtomicInteger healthCheckReceiveCount = new AtomicInteger(0);
         // then
         HealthCheckResponse poll = blockingQueue.poll(25000, TimeUnit.MILLISECONDS);
         Assertions.assertEquals("SUCCESS", poll.getStatus());

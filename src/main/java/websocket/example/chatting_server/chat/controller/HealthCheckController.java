@@ -20,6 +20,7 @@ import java.time.Duration;
 @RestController
 @RequiredArgsConstructor
 @CrossOrigin(origins = "*")
+@Slf4j
 public class HealthCheckController {
     private final TaskSchedulerService taskSchedulerService;
     private final RabbitTemplate rabbitTemplate;
@@ -33,12 +34,14 @@ public class HealthCheckController {
                 env.getProperty("spring.rabbitmq.healthcheck.delay-millis")
         );
         taskSchedulerService.start(() -> {
-            rabbitTemplate.convertAndSend(exchange, "", new HealthCheckResponse("SUCCESS", "ping"));
+            rabbitTemplate.convertAndSend(exchange, "",
+                    new HealthCheckResponse("SUCCESS",
+                            "HEALTHCHECK TO " + exchange));
         }, Duration.ofMillis(delayMillis));
     }
 
     @RabbitListener(queues = "#{healthCheckQueue.name}")
     public void receiveHealthCheckMessage(HealthCheckResponse healthCheckResponse) {
-        messagingTemplate.convertAndSendToUser("broadcast", "/healthcheck", healthCheckResponse);
+        messagingTemplate.convertAndSend("/internal/healthcheck", healthCheckResponse);
     }
 }
