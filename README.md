@@ -1,6 +1,8 @@
 # Chat App
 Chat App using Websocket
 
+![chatapp-infra drawio](https://github.com/user-attachments/assets/6af0de7b-222a-4f77-a3c4-8cae499e8c46)
+
 ## Quick Start in Local
 
 ### 1. Create React App Image
