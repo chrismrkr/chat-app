@@ -1,4 +1,4 @@
-package websocket.example.chatting_server.chat.service.impl;
+package websocket.example.chatting_server.chat.service;
 
 import org.springframework.web.socket.messaging.SessionConnectedEvent;
 import org.springframework.web.socket.messaging.SessionDisconnectEvent;

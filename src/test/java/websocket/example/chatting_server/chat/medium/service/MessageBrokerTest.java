@@ -59,7 +59,7 @@ public class MessageBrokerTest {
         });
         // when
         String topic = "chat-topic";
-        ChatDto chatDto = new ChatDto(1L, "USR1","Hello Everyone");
+        ChatDto chatDto = ChatDto.builder().roomId(1L).senderName("USR1").message("Hello Everyone").build();
         messageBrokerProduceService.broadcastToCluster(topic, chatDto);
         // then
         ChatDto poll = blockingQueue.poll(10, TimeUnit.SECONDS);
@@ -95,7 +95,11 @@ public class MessageBrokerTest {
         }
         // when
         String topic = "chat-topic";
-        ChatDto chatDto = new ChatDto(2L, "USR1","Hello Everyone");
+        ChatDto chatDto = ChatDto.builder()
+                        .roomId(2L)
+                                .senderName("USR1")
+                                        .message("Hello Everyone")
+                                                .build();
         messageBrokerProduceService.broadcastToCluster(topic, chatDto);
         // then
         for(int i=0; i<threadCount; i++) {

@@ -8,4 +8,5 @@ public interface OutboundChannelHistoryRepository {
     void updateSequence(String outboundSessionId, String inboundSessionId, Integer seq);
     int getSequence(String outboundSessionId, String inboundSessionId);
     Map<String, Integer> getHistory(String outboundSessionId);
+    boolean isSenderSessionExists(String receiverSessionId, String senderSessionIdx);
 }

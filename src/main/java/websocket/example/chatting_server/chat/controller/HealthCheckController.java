@@ -36,7 +36,7 @@ public class HealthCheckController {
         taskSchedulerService.start(() -> {
             rabbitTemplate.convertAndSend(exchange, "",
                     new HealthCheckResponse("SUCCESS",
-                            "HEALTHCHECK TO " + exchange));
+                            "HEALTH CHECK TO " + exchange));
         }, Duration.ofMillis(delayMillis));
     }
 

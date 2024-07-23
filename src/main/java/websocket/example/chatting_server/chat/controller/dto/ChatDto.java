@@ -4,10 +4,20 @@ import lombok.*;
 
 @Data
 @NoArgsConstructor
-@AllArgsConstructor
 @Getter
 public class ChatDto {
     private Long roomId;
-    private String senderName;
     private String message;
+    private String senderName;
+    private String senderSessionId;
+    private Integer seq;
+
+    @Builder
+    public ChatDto(Long roomId, String message, String senderName, String senderSessionId, Integer seq) {
+        this.roomId = roomId;
+        this.message = message;
+        this.senderName = senderName;
+        this.senderSessionId = senderSessionId;
+        this.seq = seq;
+    }
 }

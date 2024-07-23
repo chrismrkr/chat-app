@@ -17,7 +17,13 @@ public class ChatController {
 
     @MessageMapping("/message/{roomId}") // pub : /app/message/{roomId}
     public void sendToMessageBroker(@RequestBody ChatDto chatDto, @DestinationVariable String roomId) throws Exception {
-        ChatDto dto = new ChatDto(Long.parseLong(roomId), chatDto.getSenderName(), chatDto.getMessage());
+        ChatDto dto = ChatDto.builder()
+                .roomId(Long.parseLong(roomId))
+                .message(chatDto.getMessage())
+                .senderName(chatDto.getSenderName())
+                .senderSessionId(chatDto.getSenderSessionId())
+                .seq(chatDto.getSeq())
+                .build();
         String exchange = env.getProperty("spring.rabbitmq.chat.exchange-name");
         String routingKey = env.getProperty("spring.rabbitmq.chat.routing-key") + roomId;
         rabbitMQTemplate.convertAndSend(exchange, routingKey, dto);
