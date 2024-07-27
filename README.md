@@ -51,7 +51,7 @@ Due to this behavior, consumers must be prepared to handle redeliveries and othe
 
 요컨데, RabbitMQ Broker는 Consumer로 부터 Ack를 받아야 Queue에서 메세지를 제거하고, Ack를 받지 못한다면 메세지를 Requeue 한다는 것을 의미한다.
 
-그러므로, Consumer가 메세지를 받았지만 네트워크 문제 등으로 Broker에 Ack가 도착하지 않으면, Consumer는 동일한 메세지를 중복 수신하는 문제가 발생한다.
+그러므로, Consumer가 메세지를 받았지만 네트워크 문제 등으로 Broker에 Ack가 도착하지 않으면, Consumer는 동일한 메세지를 중복 수신하는 문제가 발생한다. (Idempotence 위반)
 
 ### 해결방법
 
@@ -103,4 +103,5 @@ SESSION2: ------------------>CheckSeq(SEQ: 0 VALID)------------->SEND(SEQ: 0)---
 
 - CheckSeq 이전, ```SETNX ({ReceiverSessionId}{SenderSessionId}{MessageSeq}) (VAL)```
 - UpdateSeq 이후, ```DEL ({ReceiverSessionId}{SenderSessionId}{MessageSeq})```
+
 
