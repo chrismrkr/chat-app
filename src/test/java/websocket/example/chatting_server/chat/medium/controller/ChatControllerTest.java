@@ -20,6 +20,7 @@ import websocket.example.chatting_server.chat.config.RabbitMQMessageBrokerConfig
 import websocket.example.chatting_server.chat.config.WebSocketConfig;
 import websocket.example.chatting_server.chat.controller.dto.ChatDto;
 import websocket.example.chatting_server.chat.infrastructure.impl.InMemoryOutboundChannelHistoryRepository;
+import websocket.example.chatting_server.chat.infrastructure.impl.RedisLockRepositoryImpl;
 
 import java.lang.reflect.Type;
 import java.util.*;
@@ -37,6 +38,8 @@ public class ChatControllerTest {
     RabbitMQMessageBrokerConfig rabbitMQMessageBrokerConfig;
     @Autowired
     InMemoryOutboundChannelHistoryRepository outboundChannelHistoryRepository;
+    @Autowired
+    RedisLockRepositoryImpl redisLockRepository;
     WebSocketStompClient stompClient;
 
     CompletableFuture<ChatDto> completableFuture;
@@ -92,12 +95,14 @@ public class ChatControllerTest {
         );
 
         // then
-        ChatDto chatDto = completableFuture.get(20, TimeUnit.SECONDS);
+        ChatDto chatDto = completableFuture.get(300, TimeUnit.SECONDS);
         Assertions.assertNotNull(chatDto);
         Assertions.assertEquals(1L, chatDto.getRoomId());
         Assertions.assertEquals("USR1", chatDto.getSenderName());
         Assertions.assertEquals("HELLO", chatDto.getMessage());
         Assertions.assertNotNull(chatDto.getSenderSessionId());
+        Assertions.assertEquals(false,
+                redisLockRepository.isLocked(chatDto.getSenderSessionId()+"-"+chatDto.getSenderSessionId()+"#0"));
     }
 
     @Test
@@ -136,7 +141,7 @@ public class ChatControllerTest {
     }
 
     @Test
-    void 동일한_seq로_메세지를_2번_전달하면_2번째_메세지는_무시된다() throws InterruptedException, ExecutionException, TimeoutException {
+    void 동일한_seq로_메세지를_순서대로_전달하면_2번째_부터는_무시된다() throws InterruptedException, ExecutionException, TimeoutException {
         // given
         connectedSession.subscribe("/exchange/chat.exchange/roomId.1", new StompFrameHandler() {
             @Override

@@ -20,15 +20,14 @@ public class WebsocketEventServiceImpl implements WebsocketEventService {
     @EventListener
     public void handleOutboundChannelConnectedEvent(SessionConnectedEvent event) {
         StompHeaderAccessor accessor = StompHeaderAccessor.wrap(event.getMessage());
-        log.info(accessor.getSessionId() + ": " + accessor.getMessage());
+        log.info("[SESSION HISTORY CREATED] " + accessor.getSessionId());
         outboundChannelHistoryRepository.createSessionHistory(accessor.getSessionId());
     }
-
     @Override
     @EventListener
     public void handleOutboundChannelDisconnectEvent(SessionDisconnectEvent event) {
         StompHeaderAccessor accessor = StompHeaderAccessor.wrap(event.getMessage());
-        log.info(accessor.getSessionId() + ": " + accessor.getMessage());
+        log.info("[SESSION HISTORY DISCARDED] " + accessor.getSessionId());
         outboundChannelHistoryRepository.deleteSessionHistory(accessor.getSessionId());
     }
 }

@@ -12,6 +12,7 @@ import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.messaging.support.MessageBuilder;
 import websocket.example.chatting_server.chat.controller.dto.ChatDto;
+import websocket.example.chatting_server.chat.infrastructure.LockRepository;
 import websocket.example.chatting_server.chat.infrastructure.OutboundChannelHistoryRepository;
 
 import java.awt.*;
@@ -22,20 +23,29 @@ import java.nio.charset.StandardCharsets;
 public class DuplicatedMessageCheckInterceptor implements ChannelInterceptor {
     private final ObjectMapper objectMapper;
     private final OutboundChannelHistoryRepository outboundChannelHistoryRepository;
+    private final LockRepository lockRepository;
     @Override
     public Message<?> preSend(Message<?> message, MessageChannel channel) {
         StompHeaderAccessor accessor = StompHeaderAccessor.wrap(message);
-        if(accessor.getCommand() == null || !accessor.getCommand().equals(StompCommand.MESSAGE)) {
+        if(!isMessageCommand(accessor)) {
             return message;
         }
         try {
             ChatDto chatDto = fromPayload(message);
             String senderSessionId = chatDto.getSenderSessionId();
             String receiverSessionId = accessor.getSessionId();
-            /** TODO
-             *  => Sequence Lock NEEDED AT HERE
-             **/
+
+            if(!lockRepository.holdLock(
+                    senderSessionId + "-" + receiverSessionId + "#" + chatDto.getSeq().toString(),
+                    chatDto.getSeq().toString())) {
+                // 이미 전송 중인 메세지 Sequence
+                throw new IllegalArgumentException(
+                        "[MESSAGE SEND ERROR] MESSAGE SEQUENCE "
+                        + chatDto.getSeq().toString()
+                                +" ALREADY SENT");
+            }
             if(!isReliableSequence(receiverSessionId, senderSessionId, chatDto.getSeq())) {
+                // 이미 전송 완료된 메세지 Sequence
                 throw new IllegalArgumentException("[MESSAGE SEND ERROR] MESSAGE SEQUENCE NOT VALID");
             }
         }  catch (JsonProcessingException e) {
@@ -45,27 +55,26 @@ public class DuplicatedMessageCheckInterceptor implements ChannelInterceptor {
     }
     @Override
     public void postSend(Message<?> message, MessageChannel channel, boolean sent) {
+
     }
 
     @Override
     public void afterSendCompletion(Message<?> message, MessageChannel channel, boolean sent, @Nullable Exception ex) {
         StompHeaderAccessor accessor = StompHeaderAccessor.wrap(message);
-        if(accessor.getCommand() == null || !accessor.getCommand().equals(StompCommand.MESSAGE)) {
+        ChatDto chatDto = null;
+        try {
+            chatDto = fromPayload(message);
+        } catch (Exception e) {
             return;
         }
-        try {
-            ChatDto chatDto = fromPayload(message);
 
-            String senderSessionId = chatDto.getSenderSessionId();
-            String receiverSessionId = accessor.getSessionId();
+        String senderSessionId = chatDto.getSenderSessionId();
+        String receiverSessionId = accessor.getSessionId();
+        if(isMessageCommand(accessor)) {
             int nextSeq = chatDto.getSeq();
             outboundChannelHistoryRepository.updateSequence(receiverSessionId, senderSessionId, nextSeq);
-            /** TODO
-             *  => Sequence Lock NEEDED AT HERE
-             **/
-        }  catch (JsonProcessingException e) {
-            return;
         }
+        lockRepository.releaseLock(senderSessionId + "-" + receiverSessionId + "#" + chatDto.getSeq().toString());
     }
 
     private boolean isReliableSequence(String receiverSessionId, String senderSessionId, int newSeq) {
@@ -76,8 +85,13 @@ public class DuplicatedMessageCheckInterceptor implements ChannelInterceptor {
         if(outboundChannelHistoryRepository.getSequence(receiverSessionId, senderSessionId) < newSeq) {
             return true;
         }
-        else
+        else {
             return false;
+        }
+    }
+
+    private boolean isMessageCommand(StompHeaderAccessor accessor) {
+        return accessor.getCommand() == null || !accessor.getCommand().equals(StompCommand.MESSAGE) ? false : true;
     }
 
     private ChatDto fromPayload(Message<?> message) throws JsonProcessingException {
@@ -85,5 +99,4 @@ public class DuplicatedMessageCheckInterceptor implements ChannelInterceptor {
         ChatDto chatDto = objectMapper.readValue(payload, ChatDto.class);
         return chatDto;
     }
-
 }

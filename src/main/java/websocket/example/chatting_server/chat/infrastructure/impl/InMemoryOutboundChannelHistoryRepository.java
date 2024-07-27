@@ -37,6 +37,7 @@ public class InMemoryOutboundChannelHistoryRepository implements OutboundChannel
     @Override
     public void updateSequence(String receiverSessionId, String senderSessionId, Integer seq) {
         Map<String, Integer> seqHistory = sequenceHistoryStorages.get(receiverSessionId);
+        log.info("[SESSION HISTORY UPDATE] " + receiverSessionId + " <-- " + senderSessionId + ": #" + seq);
         seqHistory.put(senderSessionId, seq);
     }
 

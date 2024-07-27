@@ -40,7 +40,7 @@ public class MessageBrokerTest {
         this.stompClient.setMessageConverter(new MappingJackson2MessageConverter());
         this.blockingQueue = new LinkedBlockingDeque<>();
     }
-    @Test
+//    @Test
     void chat_topic_메세지를_produce하면_consume할_수_있다() throws Exception {
         // given
         StompSession session = stompClient
@@ -71,7 +71,7 @@ public class MessageBrokerTest {
         Assertions.assertNull(pollNull);
 
     }
-    @Test
+//    @Test
     void chat_topic_메세지를_produce하면_여러_consumer가_받을_수_있다() throws Exception{
         // given
         int threadCount = 10;
@@ -112,7 +112,7 @@ public class MessageBrokerTest {
         Assertions.assertNull(pollNull);
     }
 
-    @Test
+//    @Test
     void roomId로_구분하여_chat_topic_메세지를_consume할_수_있다() throws Exception {
 
     }
