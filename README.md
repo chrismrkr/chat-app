@@ -31,7 +31,7 @@ Chat App using Websocket
 
 ## 2024.07.27 Update : Idempotence
 
-![externalbroker-idempotency drawio](https://github.com/user-attachments/assets/5c8e5e4a-9d01-4bd6-8e8f-59d45983d8b5)
+![externalbroker-idempotency drawio (1)](https://github.com/user-attachments/assets/53c8124a-58c8-4c52-9286-2e17ff99b40d)
 
 클라이언트가 웹 소켓을 통해 서버와 연결되면, Connection 마다 고유 Session ID를 갖는다.
 
