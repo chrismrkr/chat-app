@@ -23,10 +23,14 @@ services:
       SPRING_RABBITMQ_USERNAME: guest
       SPRING_RABBITMQ_PASSWORD: guest
       SPRING_RABBITMQ_HEALTHCHECK_EXCHANGE-NAME: healthcheck.exchange.1
+      SPRING_DATA_REDIS_HOST: chat-app-redis
+      SPRING_DATA_REDIS_PORT: 6379
+      SPRING_DATA_REDIS_DURATION-MILLIS: 10000
 
     depends_on:
       - chat-app-db
       - chat-app-rabbitmq
+      - chat-app-redis
     restart: always
 
   chat-app-backend2:
@@ -45,6 +49,7 @@ services:
     depends_on:
       - chat-app-db
       - chat-app-rabbitmq
+      - chat-app-redis
     restart: always
 
   chat-app-rabbitmq:
@@ -71,6 +76,12 @@ services:
       - MYSQL_ROOT_USER=root
       - MYSQL_ROOT_PASSWORD=1234
       - MYSQL_DATABASE=edu
+
+  chat-app-redis:
+    image: redis:latest
+    container_name: chat-app-redis
+    ports:
+      - "6379:6379"
 
   chat-app-frontend:
     image: chat-app-frontend:latest
