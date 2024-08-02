@@ -46,6 +46,9 @@ services:
       SPRING_RABBITMQ_USERNAME: guest
       SPRING_RABBITMQ_PASSWORD: guest
       SPRING_RABBITMQ_HEALTHCHECK_EXCHANGE-NAME: healthcheck.exchange.2
+      SPRING_DATA_REDIS_HOST: chat-app-redis
+      SPRING_DATA_REDIS_PORT: 6379
+      SPRING_DATA_REDIS_DURATION-MILLIS: 10000
     depends_on:
       - chat-app-db
       - chat-app-rabbitmq
