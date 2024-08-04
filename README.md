@@ -20,6 +20,9 @@ Chat App using Websocket
 ### 4. Start
 + http://localhost:80/login
 
+## Performance Test Results
+
+
 ## 2024.06.18 Update : External Broker
 + RabbitMQ(External Broker)를 통해 클라이언트가 메세지를 Subscribe할 수 있도록 변경함
 + 이에 따라 웹 소켓 컨테이너 Scale-out이 가능함
