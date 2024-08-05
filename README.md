@@ -119,6 +119,10 @@ SESSION2: ------------------>CheckSeq(SEQ: 0 VALID)------------->SEND(SEQ: 0)---
 - 오류율: 0%
 #### 2. 100 RPS
 - 평균 수신 속도: 57ms
-- 오류율: 10%
-- 오류현상: Timeout으로 인해 메세지 수신에 실패함 
+- 오류율: 10%(30000ms Timeout)
+- 현상:
+```
+Response code:Websocket I/O error
+Response message:WebSocket I/O error: Read timed out
+``` 
 
