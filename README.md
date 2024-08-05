@@ -107,12 +107,18 @@ SESSION2: ------------------>CheckSeq(SEQ: 0 VALID)------------->SEND(SEQ: 0)---
 
 ## Performance Tests
 
+클라이언트가 메세지를 수신받는 것을 기준으로 측정함
+
 ### 1차 성능 테스트
-#### 1. 하드웨어 용량
-- CPU: 2 Core
-- RAM: 4GB
-- DISK: 20GB
-
-#### 2. 컨테이너 용량
-
+- 하드웨어 용량
+  - CPU: 2 Core
+  - RAM: 4GB
+  - DISK: 20GB
+#### 1. 50 RPS(Request per Second)
+- 평균 성공 수신 속도: 53ms
+- 오류율: 0%
+#### 2. 100 RPS
+- 평균 수신 속도: 57ms
+- 오류율: 10%
+- 오류현상: Timeout으로 인해 메세지 수신에 실패함 
 
