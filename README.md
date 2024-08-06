@@ -110,7 +110,7 @@ SESSION2: ------------------>CheckSeq(SEQ: 0 VALID)------------->SEND(SEQ: 0)---
 클라이언트가 메세지를 수신받는 것을 기준으로 측정함
 
 ### 1차 성능 테스트
-- 하드웨어 용량
+- 하드웨어 성능
   - CPU: 2 Core
   - RAM: 4GB
   - DISK: 20GB
@@ -118,11 +118,15 @@ SESSION2: ------------------>CheckSeq(SEQ: 0 VALID)------------->SEND(SEQ: 0)---
 - 평균 성공 수신 속도: 53ms
 - 오류율: 0%
 #### 2. 100 RPS
-- 평균 수신 속도: 57ms
-- 오류율: 10%(30000ms Timeout)
-- 현상:
+- 오류율: 10%(3000ms Timeout)
+- 현상
 ```
 Response code:Websocket I/O error
 Response message:WebSocket I/O error: Read timed out
-``` 
-
+```
+- 트러블 슈팅
+  - CPU 및 메모리 사용률 모두 정상 수준이었고, ```iftop``` 명령어를 통해 네트워크 사용량을 모니터링 하였음
+  - Case1. 10초 내 서버 -> 클라이언트 송신 네트워크 평균 사용량이 약 30KB인 상태에서, 100 RPS 테스트
+    - 오류율 0%, 평균 수신 속도: 55ms **(정상)**
+  - Case2. 10초 내 서버 -> 클라이언트 송신 네트워크 평균 사용량이 약 800KB인 상태에서, 100 RPS 테스트
+    - 오류율 16%, 
