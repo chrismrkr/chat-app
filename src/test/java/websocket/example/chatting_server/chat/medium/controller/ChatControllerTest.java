@@ -70,7 +70,7 @@ public class ChatControllerTest {
     }
 
     @Test
-    void 웹소켓을_통해_메세지를_전달할_수_있다() throws Exception {
+    void 웹소켓_1개_연결이_메세지를_전달할_수_있다() throws Exception {
         // given
         connectedSession.subscribe("/exchange/chat.exchange/roomId.1", new StompFrameHandler() {
             @Override
@@ -103,6 +103,75 @@ public class ChatControllerTest {
         Assertions.assertNotNull(chatDto.getSenderSessionId());
         Assertions.assertEquals(false,
                 redisLockRepository.isLocked(chatDto.getSenderSessionId()+"-"+chatDto.getSenderSessionId()+"#0"));
+    }
+
+    @Test
+    void 웹소켓_N개_연결이_메세지를_전달할_수_있다() throws Exception {
+        // given
+        int sessionCount = 100;
+        List<StompSession> connectedSessionList = new ArrayList<>();
+        List<CompletableFuture<Void>> sessionReadyList = new ArrayList<>();
+        List<CompletableFuture<ChatDto>> completableFutureList = new ArrayList<>();
+        for(int i=0; i<sessionCount; i++) {
+            CompletableFuture<Void> sessionReady = new CompletableFuture<>();
+            StompSession newStomp = stompClient
+                    .connect("ws://localhost:" + port + "/ws",
+                            new StompSessionHandlerAdapter() {
+                                @Override
+                                public void afterConnected(StompSession session, StompHeaders connectedHeaders) {
+                                    sessionReady.complete(null);
+                                }
+
+                            }).get(10, TimeUnit.SECONDS);
+            sessionReady.get(5, TimeUnit.SECONDS);
+            Awaitility.await()
+                    .atMost(10, TimeUnit.SECONDS)
+                    .untilAsserted(() -> {
+                        Assertions.assertTrue(newStomp.isConnected());
+                    });
+            connectedSessionList.add(newStomp);
+            sessionReadyList.add(sessionReady);
+            completableFutureList.add(new CompletableFuture<>());
+        }
+        for(int i=0; i<sessionCount; i++) {
+            String roomId = Integer.toString(i);
+            int finalI = i;
+            connectedSessionList.get(i).subscribe("/exchange/chat.exchange/roomId." + roomId, new StompFrameHandler() {
+                @Override
+                public Type getPayloadType(StompHeaders headers) {
+                    return ChatDto.class;
+                }
+                @Override
+                public void handleFrame(StompHeaders headers, Object payload) {
+                    completableFutureList.get(finalI).complete((ChatDto) payload);
+                }
+            });
+        }
+        Thread.sleep(1000);
+
+        // when
+        for(int i=0; i<sessionCount; i++) {
+            String roomId = Integer.toString(i);
+            connectedSessionList.get(i).send("/app/message/" + roomId,
+                    ChatDto.builder()
+                            .senderName("USR" + roomId)
+                            .message("HELLO" + roomId)
+                            .seq(0)
+                            .build()
+            );
+        }
+        // then
+        for(int i=0; i<sessionCount; i++) {
+            String roomId = Integer.toString(i);
+            ChatDto chatDto = completableFutureList.get(i).get(300, TimeUnit.SECONDS);
+            Assertions.assertNotNull(chatDto);
+            Assertions.assertEquals(Integer.parseInt(roomId), chatDto.getRoomId());
+            Assertions.assertEquals("USR" + roomId, chatDto.getSenderName());
+            Assertions.assertEquals("HELLO" + roomId, chatDto.getMessage());
+            Assertions.assertNotNull(chatDto.getSenderSessionId());
+            Assertions.assertEquals(false,
+                    redisLockRepository.isLocked(chatDto.getSenderSessionId()+"-"+chatDto.getSenderSessionId()+"#0"));
+        }
     }
 
     @Test

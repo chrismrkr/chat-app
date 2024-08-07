@@ -11,6 +11,7 @@ import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.messaging.support.MessageBuilder;
+import org.springframework.messaging.support.MessageHeaderAccessor;
 import websocket.example.chatting_server.chat.controller.dto.ChatDto;
 
 import java.nio.charset.StandardCharsets;
@@ -32,10 +33,8 @@ public class SessionIdRegisterInterceptor implements ChannelInterceptor {
             String payload = new String((byte[]) message.getPayload(), StandardCharsets.UTF_8);
             ChatDto chatDto = objectMapper.readValue(payload, ChatDto.class);
             chatDto.setSenderSessionId(accessor.getSessionId());
-            Message<ChatDto> newMessage = MessageBuilder
-                    .withPayload(chatDto)
-                    .copyHeadersIfAbsent(message.getHeaders())
-                    .build();
+            Message<?> newMessage = MessageBuilder
+                    .createMessage(objectMapper.writeValueAsBytes(chatDto), message.getHeaders());
             return newMessage;
         } catch (JsonProcessingException e) {
             return message;
