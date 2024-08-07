@@ -1,6 +1,7 @@
 package websocket.example.chatting_server.chat.config;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.core.*;
 import org.springframework.amqp.rabbit.annotation.EnableRabbit;
 import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
@@ -15,6 +16,7 @@ import org.springframework.core.env.Environment;
 
 @Configuration
 @EnableRabbit
+@Slf4j
 public class RabbitMQMessageBrokerConfig {
     @Value("${spring.rabbitmq.chat.queue-name}")
     private String CHAT_QUEUE_NAME;
@@ -77,6 +79,13 @@ public class RabbitMQMessageBrokerConfig {
     public RabbitTemplate rabbitTemplate() {
         RabbitTemplate rabbitTemplate = new RabbitTemplate(connectionFactory());
         rabbitTemplate.setMessageConverter(jsonMessageConverter());
+        rabbitTemplate.setConfirmCallback(((correlationData, ack, cause) -> {
+            if(ack) {
+                log.info("[MESSAGE PUBLISH CONFIRM SUCCESS] {}", correlationData);
+            } else {
+                log.info("[MESSAGE PUBLISH CONFIRM FAIL] {}", cause);
+            }
+        }));
         return rabbitTemplate;
     }
 
@@ -84,6 +93,7 @@ public class RabbitMQMessageBrokerConfig {
     @Bean
     public ConnectionFactory connectionFactory() {
         CachingConnectionFactory factory = new CachingConnectionFactory();
+        factory.setPublisherConfirmType(CachingConnectionFactory.ConfirmType.CORRELATED);
         factory.setHost(rabbitmqHost);
         factory.setPort(rabbitmqPort);
         factory.setUsername(rabbitmqUsername);
