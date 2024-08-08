@@ -27,7 +27,7 @@ public class HealthCheckController {
     private final SimpMessagingTemplate messagingTemplate;
     private final Environment env;
 
-    @PostConstruct
+//    @PostConstruct
     public void sendExternalBrokerHealthCheck() {
         String exchange = env.getProperty("spring.rabbitmq.healthcheck.exchange-name");
         Long delayMillis = Long.parseLong(
