@@ -2,17 +2,21 @@ package websocket.example.chatting_server.chatroom.unit.service;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import websocket.example.chatting_server.chatRoom.controller.port.ChatRoomService;
+import websocket.example.chatting_server.chatRoom.domain.MemberChatRoom;
+import websocket.example.chatting_server.chatRoom.infrastructure.MemberChatRoomRepository;
+import websocket.example.chatting_server.chatRoom.service.ChatRoomService;
 import websocket.example.chatting_server.chatRoom.domain.ChatRoom;
-import websocket.example.chatting_server.chatRoom.service.ChatRoomServiceImpl;
-import websocket.example.chatting_server.chatRoom.service.port.ChatRoomRepository;
+import websocket.example.chatting_server.chatRoom.service.impl.ChatRoomServiceImpl;
+import websocket.example.chatting_server.chatRoom.infrastructure.ChatRoomRepository;
 import websocket.example.chatting_server.chatroom.unit.service.mock.MockChatRoomRepository;
+import websocket.example.chatting_server.chatroom.unit.service.mock.MockMemberChatRoomRepository;
 
 import java.util.List;
 
 public class ChatRoomServiceTest {
     ChatRoomRepository chatRoomRepository = new MockChatRoomRepository();
-    ChatRoomService chatRoomService = new ChatRoomServiceImpl(chatRoomRepository);
+    MemberChatRoomRepository memberChatRoomRepository = new MockMemberChatRoomRepository();
+    ChatRoomService chatRoomService = new ChatRoomServiceImpl(chatRoomRepository, memberChatRoomRepository);
     @Test
     void chatRoom_생성() {
         // given
@@ -23,6 +27,8 @@ public class ChatRoomServiceTest {
         // then
         Assertions.assertEquals(roomName1, chatRoom.getRoomName());
         Assertions.assertNotNull(chatRoom.getRoomId());
+        List<MemberChatRoom> byMemberId = memberChatRoomRepository.findByMemberId(memberId1);
+        Assertions.assertEquals(1, byMemberId.size());
     }
 
     @Test
@@ -36,6 +42,7 @@ public class ChatRoomServiceTest {
         // then
         List<ChatRoom> all = chatRoomService.findAll();
         Assertions.assertEquals(0, all.size());
+        List<MemberChatRoom> byMemberId = memberChatRoomRepository.findByMemberId(memberId2);
     }
 
     @Test

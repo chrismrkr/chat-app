@@ -11,27 +11,23 @@ import websocket.example.chatting_server.chatRoom.infrastructure.entity.ChatRoom
 public class ChatRoom {
     private Long roomId;
     private String roomName;
-    private Long memberId;
 
     @Builder
-    public ChatRoom(Long roomId, String roomName, Long memberId) {
+    public ChatRoom(Long roomId, String roomName) {
         this.roomId = roomId;
         this.roomName = roomName;
-        this.memberId = memberId;
     }
 
     public ChatRoomEntity toEntity() {
         return ChatRoomEntity.builder()
                 .roomId(this.roomId)
                 .roomName(this.roomName)
-                .memberId(this.memberId)
                 .build();
     }
     public static ChatRoom from(ChatRoomEntity chatRoomEntity) {
         return ChatRoom.builder()
                 .roomId(chatRoomEntity.getRoomId())
                 .roomName(chatRoomEntity.getRoomName())
-                .memberId(chatRoomEntity.getMemberId())
                 .build();
     }
 

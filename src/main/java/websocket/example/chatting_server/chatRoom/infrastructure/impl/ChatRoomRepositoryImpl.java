@@ -1,10 +1,11 @@
-package websocket.example.chatting_server.chatRoom.infrastructure;
+package websocket.example.chatting_server.chatRoom.infrastructure.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import websocket.example.chatting_server.chatRoom.domain.ChatRoom;
+import websocket.example.chatting_server.chatRoom.infrastructure.ChatRoomJpaRepository;
+import websocket.example.chatting_server.chatRoom.infrastructure.ChatRoomRepository;
 import websocket.example.chatting_server.chatRoom.infrastructure.entity.ChatRoomEntity;
-import websocket.example.chatting_server.chatRoom.service.port.ChatRoomRepository;
 
 import java.util.List;
 import java.util.Optional;
@@ -25,10 +26,9 @@ public class ChatRoomRepositoryImpl implements ChatRoomRepository {
                 .toList();
     }
     @Override
-    public ChatRoom create(Long memberId, String roomName) {
+    public ChatRoom create(String roomName) {
         ChatRoom newChatRoom = ChatRoom.builder()
                 .roomName(roomName)
-                .memberId(memberId)
                 .build();
         ChatRoomEntity save = chatRoomJpaRepository.save(newChatRoom.toEntity());
         return ChatRoom.from(save);

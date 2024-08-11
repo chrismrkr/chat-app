@@ -10,7 +10,6 @@ public class ChatRoomDomainTest {
     void ChatRoom을_ChatRoomEntity로_변환() {
         // given
         ChatRoom room1 = ChatRoom.builder()
-                .memberId(1L)
                 .roomName("room1")
                 .roomId(1L)
                 .build();
@@ -24,7 +23,6 @@ public class ChatRoomDomainTest {
     void ChatRoomEntity를_ChatRoom으로_변환() {
         // given
         ChatRoomEntity room2 = ChatRoomEntity.builder()
-                .memberId(2L)
                 .roomId(2L)
                 .roomName("room2")
                 .build();

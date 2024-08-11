@@ -1,15 +1,16 @@
 package websocket.example.chatting_server.chatRoom.infrastructure.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.HashSet;
+import java.util.Set;
+
 @Entity(name = "chat_room")
+@Table(name = "chat_room")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 public class ChatRoomEntity {
@@ -18,13 +19,14 @@ public class ChatRoomEntity {
     @Column(name = "room_id")
     private Long roomId;
     private String roomName;
-    private Long memberId;
+
+    @OneToMany(mappedBy = "chatRoomEntity", fetch = FetchType.LAZY, orphanRemoval = true)
+    private Set<MemberChatRoomEntity> memberChatRoomEntities = new HashSet<>();
 
     @Builder
-    public ChatRoomEntity(Long roomId, String roomName, Long memberId) {
+    public ChatRoomEntity(Long roomId, String roomName) {
         this.roomId = roomId;
         this.roomName = roomName;
-        this.memberId = memberId;
     }
 
 }

@@ -1,7 +1,7 @@
 package websocket.example.chatting_server.chatroom.unit.service.mock;
 
 import websocket.example.chatting_server.chatRoom.domain.ChatRoom;
-import websocket.example.chatting_server.chatRoom.service.port.ChatRoomRepository;
+import websocket.example.chatting_server.chatRoom.infrastructure.ChatRoomRepository;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,9 +24,8 @@ public class MockChatRoomRepository implements ChatRoomRepository {
     }
 
     @Override
-    public ChatRoom create(Long memberId, String roomName) {
+    public ChatRoom create(String roomName) {
         ChatRoom build = ChatRoom.builder()
-                .memberId(memberId)
                 .roomId(ID_GEN.getAndIncrement())
                 .roomName(roomName)
                 .build();

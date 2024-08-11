@@ -4,10 +4,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import websocket.example.chatting_server.chatRoom.controller.dto.AllChatRoomResDto;
-import websocket.example.chatting_server.chatRoom.controller.dto.ChatRoomCreateReqDto;
-import websocket.example.chatting_server.chatRoom.controller.dto.ChatRoomCreateResDto;
-import websocket.example.chatting_server.chatRoom.controller.port.ChatRoomService;
+import websocket.example.chatting_server.chatRoom.controller.dto.*;
+import websocket.example.chatting_server.chatRoom.service.ChatRoomService;
 import websocket.example.chatting_server.chatRoom.domain.ChatRoom;
 
 import java.util.List;
@@ -23,6 +21,11 @@ public class ChatRoomController {
     public ResponseEntity<ChatRoomCreateResDto> create(@RequestBody ChatRoomCreateReqDto dto) {
         ChatRoom chatRoom = chatRoomService.create(dto.getMemberId(), dto.getRoomName());
         return new ResponseEntity<>(new ChatRoomCreateResDto(chatRoom.getRoomId(), chatRoom.getRoomName()), HttpStatus.OK);
+    }
+    @DeleteMapping
+    public ResponseEntity<ChatRoomDeleteResDto> delete(@RequestBody ChatRoomDeleteReqDto dto) {
+
+        return new ResponseEntity<>(null, HttpStatus.OK);
     }
 
     @GetMapping
