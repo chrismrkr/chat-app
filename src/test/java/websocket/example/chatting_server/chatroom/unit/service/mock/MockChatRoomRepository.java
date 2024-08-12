@@ -37,4 +37,10 @@ public class MockChatRoomRepository implements ChatRoomRepository {
     public void delete(ChatRoom chatRoom) {
         datas.remove(chatRoom);
     }
+
+    @Override
+    public void delete(Long roomId) {
+        ChatRoom chatRoom = findById(roomId).get();
+        delete(chatRoom);
+    }
 }

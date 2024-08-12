@@ -10,4 +10,5 @@ public interface ChatRoomRepository {
     List<ChatRoom> findAll();
     ChatRoom create(String roomName);
     void delete(ChatRoom chatRoom);
+    void delete(Long roomId);
 }

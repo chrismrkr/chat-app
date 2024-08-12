@@ -6,7 +6,7 @@ import websocket.example.chatting_server.chatRoom.infrastructure.entity.composit
 
 import java.io.Serializable;
 
-@Entity(name = "member_chat_room")
+@Entity
 @Table(name = "member_chat_room")
 @NoArgsConstructor(access = AccessLevel.PUBLIC)
 @Getter

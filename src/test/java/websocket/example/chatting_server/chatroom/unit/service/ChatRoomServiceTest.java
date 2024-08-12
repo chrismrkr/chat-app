@@ -12,6 +12,7 @@ import websocket.example.chatting_server.chatroom.unit.service.mock.MockChatRoom
 import websocket.example.chatting_server.chatroom.unit.service.mock.MockMemberChatRoomRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 public class ChatRoomServiceTest {
     ChatRoomRepository chatRoomRepository = new MockChatRoomRepository();
@@ -58,5 +59,53 @@ public class ChatRoomServiceTest {
         List<ChatRoom> all = chatRoomService.findAll();
         // then
         Assertions.assertEquals(2, all.size());
+    }
+
+    @Test
+    void chatroom에_사용자가_입장() {
+        // given
+        String roomName = "room4";
+        Long memberId = 5L;
+        ChatRoom chatRoom = chatRoomService.create(memberId, roomName);
+
+        // when
+        Long newMemberId = 6L;
+        MemberChatRoom enter = chatRoomService.enter(newMemberId, chatRoom.getRoomId());
+
+        // then
+        Optional<MemberChatRoom> byMemberAndRoomId = memberChatRoomRepository.findByMemberAndRoomId(newMemberId, chatRoom.getRoomId());
+        Assertions.assertEquals(byMemberAndRoomId.get().getMemberId(), newMemberId);
+        Assertions.assertEquals(byMemberAndRoomId.get().getChatRoom().getRoomId(), chatRoom.getRoomId());
+    }
+
+    @Test
+    void 사용자의_chatroom_퇴장() {
+        // given
+        String roomName = "room5";
+        Long memberId = 7L;
+        ChatRoom chatRoom = chatRoomService.create(memberId, roomName);
+        Long newMemberId = 8L;
+        MemberChatRoom enter = chatRoomService.enter(newMemberId, chatRoom.getRoomId());
+
+        // when
+        chatRoomService.exit(newMemberId, chatRoom.getRoomId());
+
+        // then
+        Assertions.assertEquals(memberChatRoomRepository.findByMemberId(memberId).size(), 1);
+        Assertions.assertEquals(memberChatRoomRepository.findByMemberId(newMemberId).size(), 0);
+        Assertions.assertNotNull(chatRoomRepository.findById(chatRoom.getRoomId()));
+    }
+
+    @Test
+    void 사용자_chatroom_퇴장_후_남은_인원이_없으면_채팅방을_삭제함() {
+        // given
+        String roomName = "room6";
+        Long memberId = 9L;
+        ChatRoom chatRoom = chatRoomService.create(memberId, roomName);
+        // when
+        chatRoomService.exit(memberId, chatRoom.getRoomId());
+        // then
+        Assertions.assertEquals(memberChatRoomRepository.findByMemberId(memberId).size() ,0);
+        Assertions.assertEquals(chatRoomRepository.findById(chatRoom.getRoomId()), Optional.empty());
     }
 }

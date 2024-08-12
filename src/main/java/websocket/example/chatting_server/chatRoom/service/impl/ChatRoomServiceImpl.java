@@ -46,5 +46,17 @@ public class ChatRoomServiceImpl implements ChatRoomService {
 
     @Override
     public void exit(Long memberId, Long roomId) {
+        MemberChatRoom memberChatRoom = memberChatRoomRepository.findByMemberAndRoomId(memberId, roomId)
+                .orElseThrow(() -> new IllegalArgumentException("[INVALID MEMBER OR ROOM ID]: ID NOT MATCHED"));
+        memberChatRoomRepository.deleteMemberChatroomMapping(memberChatRoom);
+        checkIsVacantRoom(roomId);
+    }
+
+    @Transactional
+    private void checkIsVacantRoom(Long roomId) {
+        List<MemberChatRoom> byRoomId = memberChatRoomRepository.findByRoomId(roomId);
+        if(byRoomId == null || byRoomId.isEmpty()) {
+            chatRoomRepository.delete(roomId);
+        }
     }
 }

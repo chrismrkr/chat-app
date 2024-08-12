@@ -21,7 +21,7 @@ public class MockMemberChatRoomRepository implements MemberChatRoomRepository {
     }
 
     @Override
-    public void removeMemberInChatRoom(MemberChatRoom memberChatRoom) {
+    public void deleteMemberChatroomMapping(MemberChatRoom memberChatRoom) {
         datas.remove(memberChatRoom);
     }
 
@@ -37,6 +37,13 @@ public class MockMemberChatRoomRepository implements MemberChatRoomRepository {
     @Override
     public List<MemberChatRoom> findByMemberId(Long memberId) {
         List<MemberChatRoom> list = datas.stream().filter(memberChatRoom -> memberChatRoom.getMemberId() == memberId)
+                .toList();
+        return list;
+    }
+
+    @Override
+    public List<MemberChatRoom> findByRoomId(Long roomId) {
+        List<MemberChatRoom> list = datas.stream().filter(memberChatRoom -> memberChatRoom.getChatRoom().getRoomId() == roomId)
                 .toList();
         return list;
     }

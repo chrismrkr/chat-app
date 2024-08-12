@@ -2,6 +2,7 @@ package websocket.example.chatting_server.chatRoom.infrastructure.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 import websocket.example.chatting_server.chatRoom.domain.ChatRoom;
 import websocket.example.chatting_server.chatRoom.domain.MemberChatRoom;
 import websocket.example.chatting_server.chatRoom.infrastructure.MemberChatRoomJpaRepository;
@@ -28,12 +29,13 @@ public class MemberChatRoomRepositoryImpl implements MemberChatRoomRepository {
     }
 
     @Override
-    public void removeMemberInChatRoom(MemberChatRoom memberChatRoom) {
+    public void deleteMemberChatroomMapping(MemberChatRoom memberChatRoom) {
         memberChatRoomJpaRepository.delete(memberChatRoom.toEntity());
     }
 
 
     @Override
+    @Transactional
     public List<MemberChatRoom> findByMemberId(Long memberId) {
         List<MemberChatRoom> list = memberChatRoomJpaRepository.findByMemberId(memberId)
                 .stream().map(MemberChatRoom::from)
@@ -42,6 +44,16 @@ public class MemberChatRoomRepositoryImpl implements MemberChatRoomRepository {
     }
 
     @Override
+    @Transactional
+    public List<MemberChatRoom> findByRoomId(Long roomId) {
+        List<MemberChatRoom> list = memberChatRoomJpaRepository.findByRoomId(roomId)
+                .stream().map(MemberChatRoom::from)
+                .toList();
+        return list;
+    }
+
+    @Override
+    @Transactional
     public Optional<MemberChatRoom> findByMemberAndRoomId(Long memberId, Long roomId) {
         Optional<MemberChatRoom> memberChatRoom = memberChatRoomJpaRepository.findById(new MemberChatRoomId(memberId, roomId))
                 .map(MemberChatRoom::from);

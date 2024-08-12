@@ -38,4 +38,10 @@ public class ChatRoomRepositoryImpl implements ChatRoomRepository {
     public void delete(ChatRoom chatRoom) {
         chatRoomJpaRepository.delete(chatRoom.toEntity());
     }
+
+    @Override
+    public void delete(Long roomId) {
+        chatRoomJpaRepository.deleteById(roomId);
+    }
+
 }

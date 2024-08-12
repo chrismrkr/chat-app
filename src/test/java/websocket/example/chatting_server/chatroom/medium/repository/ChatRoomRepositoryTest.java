@@ -29,7 +29,7 @@ public class ChatRoomRepositoryTest {
 
     @Test
     @Transactional
-    void Member의_ChatRoom_생성() {
+    void Member가_ChatRoom을_생성() {
         // given
         String roomName = "room1";
         Long memberId = 1L;
@@ -94,7 +94,7 @@ public class ChatRoomRepositoryTest {
 
     @Test
     @Transactional
-    void Chatroom을_memberId로_검색() {
+    void MemberChatRoom을_memberId로_검색() {
         // given
         String[] roomNames = {"room6", "room7"};
         Long memberId = 6L;
@@ -116,8 +116,9 @@ public class ChatRoomRepositoryTest {
         }
     }
 
+    // orphanremoval과 cascade remove 차이 정리할 것
     @Test
-    void chatroom이_삭제되면_memberChatroom_연관관계_매핑도_제거된다() {
+    void chatroom이_삭제되면_memberChatroom_연관관계_매핑도_제거() {
         // given
         String roomName = "room8";
         Long[] memberIds = {7L, 8L, 9L};
@@ -134,7 +135,7 @@ public class ChatRoomRepositoryTest {
     }
 
     @Test
-    void memberId와_roomId로_memberChatRoom을_조회한다() {
+    void memberChatRoom을_memberId와_roomId로_조회() {
         // given
         String roomName = "room9";
         Long[] memberIds = {10L};
@@ -147,12 +148,56 @@ public class ChatRoomRepositoryTest {
         // then
         Assertions.assertNotEquals(byMemberAndRoomId, Optional.empty());
     }
-    @Test
-    void memberChatroom을_삭제한다() {
 
+    @Test
+    void memberChatroom을_삭제() {
+        // given
+        String roomName = "room10";
+        Long[] memberIds = {11L, 12L};
+        ChatRoom chatRoom = joinChatRoom(roomName, memberIds);
+
+        // when
+        MemberChatRoom memberChatRoom = memberChatRoomRepository.findByMemberAndRoomId(memberIds[0], chatRoom.getRoomId())
+                .get();
+        memberChatRoomRepository.deleteMemberChatroomMapping(memberChatRoom);
+
+        // then
+        Assertions.assertEquals(
+                memberChatRoomRepository.findByMemberId(11L).size(),
+                0);
     }
 
+    @Test
+    void MemberChatRoom을_roomId로_조회() {
+        // given
+        String roomName = "room11";
+        Long[] memberIds = {13L, 14L};
+        ChatRoom chatRoom = joinChatRoom(roomName, memberIds);
 
+        // when
+        List<MemberChatRoom> byRoomId = memberChatRoomRepository.findByRoomId(chatRoom.getRoomId());
+
+        // then
+        Assertions.assertEquals(2, byRoomId.size());
+        for(int i=0; i<memberIds.length; i++) {
+            Assertions.assertEquals(byRoomId.get(i).getMemberId(), memberIds[i]);
+        }
+    }
+
+    @Test
+    void Chatroom을_roomId로_삭제() {
+        // given
+        String roomName = "room12";
+        ChatRoom chatRoom = chatRoomRepository.create(roomName);
+
+        // when
+        chatRoomRepository.delete(chatRoom.getRoomId());
+
+        // then
+        Assertions.assertEquals(
+        chatRoomRepository.findById(chatRoom.getRoomId())
+        , Optional.empty());
+    }
 
     @Transactional
     private ChatRoom joinChatRoom(String roomName, Long[] memberIds) {

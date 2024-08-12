@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 import java.util.HashSet;
 import java.util.Set;
 
-@Entity(name = "chat_room")
+@Entity
 @Table(name = "chat_room")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter

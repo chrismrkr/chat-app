@@ -6,6 +6,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import websocket.example.chatting_server.chatRoom.infrastructure.entity.ChatRoomEntity;
 
+import java.util.Set;
+
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 public class ChatRoom {
@@ -13,7 +15,7 @@ public class ChatRoom {
     private String roomName;
 
     @Builder
-    public ChatRoom(Long roomId, String roomName) {
+    public ChatRoom(Long roomId, String roomName, Set<MemberChatRoom> memberChatRooms) {
         this.roomId = roomId;
         this.roomName = roomName;
     }

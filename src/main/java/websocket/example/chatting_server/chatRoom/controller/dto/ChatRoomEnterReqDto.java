@@ -6,9 +6,9 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
-@NoArgsConstructor(access = AccessLevel.PUBLIC)
-public class ChatRoomDeleteReqDto {
-    private Long roomId;
+public class ChatRoomEnterReqDto {
     private Long memberId;
+    private Long roomId;
 }

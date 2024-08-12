@@ -8,7 +8,8 @@ import java.util.Optional;
 
 public interface MemberChatRoomRepository {
     MemberChatRoom addMemberInChatRoom(Long memberId, ChatRoom chatRoom);
-    void removeMemberInChatRoom(MemberChatRoom memberChatRoom);
+    void deleteMemberChatroomMapping(MemberChatRoom memberChatRoom);
     List<MemberChatRoom> findByMemberId(Long memberId);
+    List<MemberChatRoom> findByRoomId(Long roomId);
     Optional<MemberChatRoom> findByMemberAndRoomId(Long memberId, Long roomId);
 }
