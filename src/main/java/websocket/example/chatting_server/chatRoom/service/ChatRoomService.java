@@ -8,7 +8,9 @@ import java.util.List;
 public interface ChatRoomService {
     void delete(Long roomId);
     List<ChatRoom> findAll();
+    List<ChatRoom> findByMemberId(Long memberId);
     ChatRoom create(Long memberId, String roomName);
     MemberChatRoom enter(Long memberId, Long roomId);
     void exit(Long memberId, Long roomId);
+
 }

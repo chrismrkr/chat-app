@@ -27,6 +27,15 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     public List<ChatRoom> findAll() {
         return chatRoomRepository.findAll();
     }
+
+    @Override
+    public List<ChatRoom> findByMemberId(Long memberId) {
+        return memberChatRoomRepository.findByMemberId(memberId)
+                .stream()
+                .map(MemberChatRoom::getChatRoom)
+                .toList();
+    }
+
     @Override
     @Transactional
     public ChatRoom create(Long memberId, String roomName) {

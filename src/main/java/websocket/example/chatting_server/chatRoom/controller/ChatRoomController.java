@@ -19,25 +19,38 @@ public class ChatRoomController {
     private final ChatRoomService chatRoomService;
 
     @PostMapping("/create")
-    public ResponseEntity<ChatRoomCreateResDto> create(@RequestBody ChatRoomCreateReqDto dto) {
+    public ResponseEntity<ChatRoomCreateResDto> handleCreate(@RequestBody ChatRoomCreateReqDto dto) {
         ChatRoom chatRoom = chatRoomService.create(dto.getMemberId(), dto.getRoomName());
         return new ResponseEntity<>(new ChatRoomCreateResDto(chatRoom.getRoomId(), chatRoom.getRoomName()), HttpStatus.OK);
     }
 
     @PostMapping("/enter")
-    public ResponseEntity<ChatRoomEnterResDto> enter(@RequestBody ChatRoomEnterReqDto dto) {
+    public ResponseEntity<ChatRoomEnterResDto> handleEnter(@RequestBody ChatRoomEnterReqDto dto) {
         MemberChatRoom enter = chatRoomService.enter(dto.getMemberId(), dto.getRoomId());
-        return new ResponseEntity<>(null, HttpStatus.OK);
+        ChatRoomEnterResDto res = ChatRoomEnterResDto.builder()
+                .status("ENTER")
+                .build();
+        return new ResponseEntity<>(res, HttpStatus.OK);
     }
 
     @PostMapping("/exit")
-    public ResponseEntity<ChatRoomEnterResDto> exit(@RequestBody ChatRoomEnterReqDto dto) {
+    public ResponseEntity<ChatRoomEnterResDto> handleExit(@RequestBody ChatRoomEnterReqDto dto) {
         chatRoomService.exit(dto.getMemberId(), dto.getRoomId());
+        ChatRoomEnterResDto res = ChatRoomEnterResDto.builder()
+                .status("EXIT")
+                .build();
         return new ResponseEntity<>(null, HttpStatus.OK);
     }
+
     @GetMapping
-    public ResponseEntity<AllChatRoomResDto> findAll() {
+    public ResponseEntity<ChatRoomListResDto> handleGettingAll() {
         List<ChatRoom> all = chatRoomService.findAll();
-        return new ResponseEntity<>(new AllChatRoomResDto(all.size(), all), HttpStatus.OK);
+        return new ResponseEntity<>(new ChatRoomListResDto(all.size(), all), HttpStatus.OK);
+    }
+
+    @GetMapping("/{memberId}")
+    public ResponseEntity<ChatRoomListResDto> handleGettingMyChatroom(@PathVariable String memberId) {
+        List<ChatRoom> byMemberId = chatRoomService.findByMemberId(Long.parseLong(memberId));
+        return new ResponseEntity<>(new ChatRoomListResDto(byMemberId.size(), byMemberId), HttpStatus.OK);
     }
 }

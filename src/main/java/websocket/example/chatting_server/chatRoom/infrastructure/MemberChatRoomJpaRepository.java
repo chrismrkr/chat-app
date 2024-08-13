@@ -11,8 +11,19 @@ import java.util.List;
 public interface MemberChatRoomJpaRepository extends JpaRepository<MemberChatRoomEntity, MemberChatRoomId> {
     List<MemberChatRoomEntity> findByMemberId(Long memberId);
     @Query(value = "SELECT mcr " +
+            "FROM MemberChatRoomEntity mcr " +
+            "JOIN FETCH mcr.chatRoomEntity " +
+            "WHERE mcr.memberId = :memberId"
+    )
+    List<MemberChatRoomEntity> findByMemberIdWithChatRoom(@Param("memberId") Long memberId);
+    @Query(value = "SELECT mcr " +
                     "FROM MemberChatRoomEntity mcr " +
                     "WHERE mcr.chatRoomEntity.roomId = :roomId"
             )
     List<MemberChatRoomEntity> findByRoomId(@Param("roomId") Long roomId);
+    @Query(value = "SELECT mcr " +
+                    "FROM MemberChatRoomEntity mcr " +
+                    "JOIN FETCH mcr.chatRoomEntity " +
+                    "WHERE mcr.chatRoomEntity.roomId = :roomId")
+    List<MemberChatRoomEntity> findByRoomIdWithChatRoom(@Param("roomId") Long roomId);
 }

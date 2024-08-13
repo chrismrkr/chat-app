@@ -11,7 +11,7 @@ import java.util.List;
 @Data
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
-public class AllChatRoomResDto {
+public class ChatRoomListResDto {
     private int count;
     private List<ChatRoom> chatRoomList;
 }

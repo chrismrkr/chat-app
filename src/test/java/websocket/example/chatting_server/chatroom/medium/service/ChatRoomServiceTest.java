@@ -9,6 +9,7 @@ import websocket.example.chatting_server.chatRoom.infrastructure.ChatRoomReposit
 import websocket.example.chatting_server.chatRoom.infrastructure.MemberChatRoomRepository;
 import websocket.example.chatting_server.chatRoom.service.ChatRoomService;
 
+import java.util.List;
 import java.util.Optional;
 
 @SpringBootTest
@@ -133,5 +134,25 @@ public class ChatRoomServiceTest {
         // then
         Assertions.assertEquals(chatRoomRepository.findById(chatRoom.getRoomId()), Optional.empty());
         Assertions.assertEquals(memberChatRoomRepository.findByRoomId(chatRoom.getRoomId()).size(), 0);
+    }
+
+    @Test
+    void memberId로_chatroom_조회() {
+        // given
+        Long memberId1 = 8L;
+        Long memberId2 = 9L;
+        String[] roomNames = {"room7", "room8", "room9"};
+        chatRoomService.create(memberId1, roomNames[0]);
+        chatRoomService.create(memberId1, roomNames[1]);
+        chatRoomService.create(memberId2, roomNames[2]);
+
+        // when
+        List<ChatRoom> byMemberId1 = chatRoomService.findByMemberId(memberId1);
+        List<ChatRoom> byMemberId2 = chatRoomService.findByMemberId(memberId2);
+
+        // then
+        Assertions.assertEquals(byMemberId1.size(), 2);
+        Assertions.assertEquals(byMemberId2.size(), 1);
+        Assertions.assertEquals(byMemberId2.get(0).getRoomName(), roomNames[2]);
     }
 }

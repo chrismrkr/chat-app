@@ -35,18 +35,16 @@ public class MemberChatRoomRepositoryImpl implements MemberChatRoomRepository {
 
 
     @Override
-    @Transactional
     public List<MemberChatRoom> findByMemberId(Long memberId) {
-        List<MemberChatRoom> list = memberChatRoomJpaRepository.findByMemberId(memberId)
+        List<MemberChatRoom> list = memberChatRoomJpaRepository.findByMemberIdWithChatRoom(memberId)
                 .stream().map(MemberChatRoom::from)
                 .toList();
         return list;
     }
 
     @Override
-    @Transactional
     public List<MemberChatRoom> findByRoomId(Long roomId) {
-        List<MemberChatRoom> list = memberChatRoomJpaRepository.findByRoomId(roomId)
+        List<MemberChatRoom> list = memberChatRoomJpaRepository.findByRoomIdWithChatRoom(roomId)
                 .stream().map(MemberChatRoom::from)
                 .toList();
         return list;
