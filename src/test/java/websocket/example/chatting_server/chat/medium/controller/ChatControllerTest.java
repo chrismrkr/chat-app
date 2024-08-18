@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
@@ -14,6 +15,7 @@ import org.springframework.messaging.simp.stomp.StompHeaders;
 import org.springframework.messaging.simp.stomp.StompSession;
 import org.springframework.messaging.simp.stomp.StompSessionHandlerAdapter;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.socket.client.standard.StandardWebSocketClient;
 import org.springframework.web.socket.messaging.WebSocketStompClient;
 import websocket.example.chatting_server.chat.config.RabbitMQMessageBrokerConfig;
@@ -21,6 +23,8 @@ import websocket.example.chatting_server.chat.config.WebSocketConfig;
 import websocket.example.chatting_server.chat.controller.dto.ChatDto;
 import websocket.example.chatting_server.chat.infrastructure.impl.InMemoryOutboundChannelHistoryRepository;
 import websocket.example.chatting_server.chat.infrastructure.impl.RedisLockRepositoryImpl;
+import websocket.example.chatting_server.chat.interceptor.SessionIdRegisterInterceptor;
+import websocket.example.chatting_server.chat.utils.ChatIdGenerateUtils;
 
 import java.lang.reflect.Type;
 import java.util.*;
@@ -40,8 +44,11 @@ public class ChatControllerTest {
     InMemoryOutboundChannelHistoryRepository outboundChannelHistoryRepository;
     @Autowired
     RedisLockRepositoryImpl redisLockRepository;
+    @Autowired
+    ChatIdGenerateUtils chatIdGenerateUtils;
+    @Autowired
+    SessionIdRegisterInterceptor sessionIdRegisterInterceptor;
     WebSocketStompClient stompClient;
-
     CompletableFuture<ChatDto> completableFuture;
     CompletableFuture<Void> sessionConnectedReady;
     StompSession connectedSession;
@@ -90,7 +97,6 @@ public class ChatControllerTest {
                 ChatDto.builder()
                         .senderName("USR1")
                         .message("HELLO")
-                        .seq(0)
                         .build()
         );
 
@@ -156,7 +162,6 @@ public class ChatControllerTest {
                     ChatDto.builder()
                             .senderName("USR" + roomId)
                             .message("HELLO" + roomId)
-                            .seq(0)
                             .build()
             );
         }
@@ -193,7 +198,6 @@ public class ChatControllerTest {
         String roomId = "1";
         connectedSession.send("/app/message/" + roomId,
                 ChatDto.builder()
-                        .seq(0)
                         .senderName("USR1")
                         .message("HELLO")
                         .build()
@@ -205,13 +209,16 @@ public class ChatControllerTest {
         Assertions.assertEquals("USR1", chatDto.getSenderName());
         Assertions.assertEquals("HELLO", chatDto.getMessage());
         Assertions.assertNotNull(chatDto.getSenderSessionId());
-        Assertions.assertEquals(0, chatDto.getSeq());
-        Assertions.assertEquals(0, outboundChannelHistoryRepository.getSequence(chatDto.getSenderSessionId(), chatDto.getSenderSessionId()));
+        Assertions.assertNotNull(chatDto.getSeq());
+        Assertions.assertEquals(chatDto.getSeq(), outboundChannelHistoryRepository.getSequence(chatDto.getSenderSessionId(), chatDto.getSenderSessionId()));
     }
 
     @Test
     void 동일한_seq로_메세지를_순서대로_전달하면_2번째_부터는_무시된다() throws InterruptedException, ExecutionException, TimeoutException {
         // given
+        ChatIdGenerateUtils mockChatIdGenerateUtils = Mockito.mock(ChatIdGenerateUtils.class);
+        Mockito.when(mockChatIdGenerateUtils.nextId()).thenReturn(1825044961289043968L);
+        ReflectionTestUtils.setField(sessionIdRegisterInterceptor, "chatIdGenerateUtils", mockChatIdGenerateUtils);
         connectedSession.subscribe("/exchange/chat.exchange/roomId.1", new StompFrameHandler() {
             @Override
             public Type getPayloadType(StompHeaders headers) {
@@ -225,10 +232,9 @@ public class ChatControllerTest {
         Thread.sleep(1000);
 
         // when1
-        String roomId = "1";
+        String roomId = "1";// ex. 1825044961289043968
         connectedSession.send("/app/message/" + roomId,
                 ChatDto.builder()
-                        .seq(0)
                         .senderName("USR1")
                         .message("HELLO1")
                         .build()
@@ -240,14 +246,12 @@ public class ChatControllerTest {
         Assertions.assertEquals("USR1", chatDto.getSenderName());
         Assertions.assertEquals("HELLO1", chatDto.getMessage());
         Assertions.assertNotNull(chatDto.getSenderSessionId());
-        Assertions.assertEquals(0, chatDto.getSeq());
-        Assertions.assertEquals(0, outboundChannelHistoryRepository.getSequence(chatDto.getSenderSessionId(), chatDto.getSenderSessionId()));
+        Assertions.assertEquals(chatDto.getSeq(), outboundChannelHistoryRepository.getSequence(chatDto.getSenderSessionId(), chatDto.getSenderSessionId()));
 
         // when2
         completableFuture = new CompletableFuture<>();
         connectedSession.send("/app/message/" + roomId,
                 ChatDto.builder()
-                        .seq(0)
                         .senderName("USR1")
                         .message("HELLO2")
                         .build()

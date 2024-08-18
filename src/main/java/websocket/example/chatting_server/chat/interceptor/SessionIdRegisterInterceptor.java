@@ -13,6 +13,7 @@ import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.messaging.support.MessageHeaderAccessor;
 import websocket.example.chatting_server.chat.controller.dto.ChatDto;
+import websocket.example.chatting_server.chat.utils.ChatIdGenerateUtils;
 
 import java.nio.charset.StandardCharsets;
 
@@ -20,6 +21,7 @@ import java.nio.charset.StandardCharsets;
 @RequiredArgsConstructor
 public class SessionIdRegisterInterceptor implements ChannelInterceptor {
     private final ObjectMapper objectMapper;
+    private final ChatIdGenerateUtils chatIdGenerateUtils;
     @Override
     public Message<?> preSend(Message<?> message, MessageChannel channel) {
         StompHeaderAccessor accessor = StompHeaderAccessor.wrap(message);
@@ -33,6 +35,7 @@ public class SessionIdRegisterInterceptor implements ChannelInterceptor {
             String payload = new String((byte[]) message.getPayload(), StandardCharsets.UTF_8);
             ChatDto chatDto = objectMapper.readValue(payload, ChatDto.class);
             chatDto.setSenderSessionId(accessor.getSessionId());
+            chatDto.setSeq(chatIdGenerateUtils.nextId());
             Message<?> newMessage = MessageBuilder
                     .createMessage(objectMapper.writeValueAsBytes(chatDto), message.getHeaders());
             return newMessage;

@@ -39,7 +39,7 @@ public class ChatRoomController {
         ChatRoomEnterResDto res = ChatRoomEnterResDto.builder()
                 .status("EXIT")
                 .build();
-        return new ResponseEntity<>(null, HttpStatus.OK);
+        return new ResponseEntity<>(res, HttpStatus.OK);
     }
 
     @GetMapping

@@ -14,6 +14,7 @@ import org.springframework.messaging.support.MessageBuilder;
 import websocket.example.chatting_server.chat.controller.dto.ChatDto;
 import websocket.example.chatting_server.chat.infrastructure.LockRepository;
 import websocket.example.chatting_server.chat.infrastructure.OutboundChannelHistoryRepository;
+import websocket.example.chatting_server.chat.utils.ChatIdGenerateUtils;
 
 import java.awt.*;
 import java.nio.charset.StandardCharsets;
@@ -71,22 +72,28 @@ public class DuplicatedMessageCheckInterceptor implements ChannelInterceptor {
         String senderSessionId = chatDto.getSenderSessionId();
         String receiverSessionId = accessor.getSessionId();
         if(isMessageCommand(accessor)) {
-            int nextSeq = chatDto.getSeq();
+            long nextSeq = chatDto.getSeq();
             outboundChannelHistoryRepository.updateSequence(receiverSessionId, senderSessionId, nextSeq);
         }
         lockRepository.releaseLock(senderSessionId + "-" + receiverSessionId + "#" + chatDto.getSeq().toString());
     }
 
-    private boolean isReliableSequence(String receiverSessionId, String senderSessionId, int newSeq) {
+    private boolean isReliableSequence(String receiverSessionId, String senderSessionId, long newSeq) {
         if(!outboundChannelHistoryRepository.isSenderSessionExists(receiverSessionId, senderSessionId)) {
-            outboundChannelHistoryRepository.updateSequence(receiverSessionId, senderSessionId, -1);
+            outboundChannelHistoryRepository.updateSequence(receiverSessionId, senderSessionId, -1L);
             return true;
         }
-        if(outboundChannelHistoryRepository.getSequence(receiverSessionId, senderSessionId) < newSeq) {
+        long exSeq = outboundChannelHistoryRepository.getSequence(receiverSessionId, senderSessionId);
+        long exTimestamp = (exSeq >> ChatIdGenerateUtils.TIMESTAMP_SHIFT) & ChatIdGenerateUtils.TIMESTAMP_MASK;
+        long exSerialNumber = exSeq & ChatIdGenerateUtils.SEQUENCE_MASK;
+        long newTimestamp = (newSeq >> ChatIdGenerateUtils.TIMESTAMP_SHIFT) & ChatIdGenerateUtils.TIMESTAMP_MASK;
+        long newSerialNumber = newSeq & ChatIdGenerateUtils.SEQUENCE_MASK;
+        if(exTimestamp < newTimestamp) {
             return true;
-        }
-        else {
+        } else if(exTimestamp > newTimestamp) {
             return false;
+        } else {
+            return exSerialNumber < newSerialNumber;
         }
     }
 

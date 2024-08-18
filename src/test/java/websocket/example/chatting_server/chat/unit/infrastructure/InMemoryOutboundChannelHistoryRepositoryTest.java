@@ -22,7 +22,7 @@ public class InMemoryOutboundChannelHistoryRepositoryTest {
         // when
         repository.createSessionHistory(outboundChannelSessionId);
         // then
-        Map<String, Integer> history = repository.getHistory(outboundChannelSessionId);
+        Map<String, Long> history = repository.getHistory(outboundChannelSessionId);
         Assertions.assertNotNull(history);
     }
 
@@ -33,13 +33,13 @@ public class InMemoryOutboundChannelHistoryRepositoryTest {
         // when
         repository.createSessionHistory(outboundChannelSessionId);
         // then
-        Map<String, Integer> history = repository.getHistory(outboundChannelSessionId);
+        Map<String, Long> history = repository.getHistory(outboundChannelSessionId);
         Assertions.assertNotNull(history);
 
         // when
         repository.createSessionHistory(outboundChannelSessionId);
         // then
-        Map<String, Integer> history2 = repository.getHistory(outboundChannelSessionId);
+        Map<String, Long> history2 = repository.getHistory(outboundChannelSessionId);
         Assertions.assertNotNull(history2);
     }
 
@@ -50,7 +50,7 @@ public class InMemoryOutboundChannelHistoryRepositoryTest {
         repository.createSessionHistory(outboundChannelSessionId);
         // when
         String inboundChannelSessionId = "inbound.1";
-        int sequence = 0;
+        long sequence = 0;
         repository.updateSequence(outboundChannelSessionId, inboundChannelSessionId, sequence);
         // then
         Assertions.assertEquals(sequence,
@@ -63,7 +63,7 @@ public class InMemoryOutboundChannelHistoryRepositoryTest {
         String outboundChannelSessionId = "outbound.3";
         repository.createSessionHistory(outboundChannelSessionId);
         String inboundChannelSessionId = "inbound.2";
-        int sequence = 0;
+        long sequence = 0;
         repository.updateSequence(outboundChannelSessionId, inboundChannelSessionId, sequence);
 
         // when
@@ -90,7 +90,7 @@ public class InMemoryOutboundChannelHistoryRepositoryTest {
         String outboundChannelSessionId = "outbound.5";
         repository.createSessionHistory(outboundChannelSessionId);
         String inboundChannelSessionId = "inbound.5";
-        repository.updateSequence(outboundChannelSessionId, inboundChannelSessionId, 0);
+        repository.updateSequence(outboundChannelSessionId, inboundChannelSessionId, 0L);
         // when
         boolean senderSessionExists = repository.isSenderSessionExists(outboundChannelSessionId, inboundChannelSessionId);
         // then

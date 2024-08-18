@@ -3,6 +3,7 @@ package websocket.example.chatting_server.chat.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 import org.springframework.messaging.simp.config.ChannelRegistration;
@@ -14,6 +15,7 @@ import websocket.example.chatting_server.chat.infrastructure.LockRepository;
 import websocket.example.chatting_server.chat.infrastructure.OutboundChannelHistoryRepository;
 import websocket.example.chatting_server.chat.interceptor.DuplicatedMessageCheckInterceptor;
 import websocket.example.chatting_server.chat.interceptor.SessionIdRegisterInterceptor;
+import websocket.example.chatting_server.chat.utils.ChatIdGenerateUtils;
 
 @Configuration
 @EnableWebSocketMessageBroker
@@ -22,6 +24,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     private final ObjectMapper objectMapper;
     private final OutboundChannelHistoryRepository outboundChannelHistoryRepository;
     private final LockRepository lockRepository;
+    private final ChatIdGenerateUtils chatIdGenerateUtils;
     @Value("${spring.rabbitmq.host}")
     private String rabbitmqHost;
     @Value("${spring.rabbitmq.relay-port}")
@@ -47,14 +50,22 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
         // internal broker
         config.enableSimpleBroker("/internal");
     }
+    @Bean
+    public SessionIdRegisterInterceptor sessionIdRegisterInterceptor() {
+        return new SessionIdRegisterInterceptor(objectMapper, chatIdGenerateUtils);
+    }
+    @Bean
+    public DuplicatedMessageCheckInterceptor duplicatedMessageCheckInterceptor() {
+        return new DuplicatedMessageCheckInterceptor(objectMapper, outboundChannelHistoryRepository, lockRepository);
+    }
 
     @Override
     public void configureClientInboundChannel(ChannelRegistration registration) {
-        registration.interceptors(new SessionIdRegisterInterceptor(objectMapper));
+        registration.interceptors(sessionIdRegisterInterceptor());
     }
     @Override
     public void configureClientOutboundChannel(ChannelRegistration registration) {
-        registration.interceptors(new DuplicatedMessageCheckInterceptor(objectMapper, outboundChannelHistoryRepository, lockRepository));
+        registration.interceptors(duplicatedMessageCheckInterceptor());
     }
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {

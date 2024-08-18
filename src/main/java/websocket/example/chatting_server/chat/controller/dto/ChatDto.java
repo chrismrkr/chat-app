@@ -10,10 +10,10 @@ public class ChatDto {
     private String message;
     private String senderName;
     private String senderSessionId;
-    private Integer seq;
+    private Long seq;
 
     @Builder
-    public ChatDto(Long roomId, String message, String senderName, String senderSessionId, Integer seq) {
+    public ChatDto(Long roomId, String message, String senderName, String senderSessionId, Long seq) {
         this.roomId = roomId;
         this.message = message;
         this.senderName = senderName;

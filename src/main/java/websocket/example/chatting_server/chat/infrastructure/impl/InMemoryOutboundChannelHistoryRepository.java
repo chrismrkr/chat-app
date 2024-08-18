@@ -2,7 +2,6 @@ package websocket.example.chatting_server.chat.infrastructure.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.kafka.common.protocol.types.Field;
 import org.springframework.stereotype.Repository;
 import websocket.example.chatting_server.chat.infrastructure.OutboundChannelHistoryRepository;
 
@@ -14,11 +13,11 @@ import java.util.concurrent.ConcurrentHashMap;
 @Repository
 @RequiredArgsConstructor
 public class InMemoryOutboundChannelHistoryRepository implements OutboundChannelHistoryRepository {
-    private Map<String, ConcurrentHashMap<String, Integer>> sequenceHistoryStorages = new HashMap<>();
+    private Map<String, ConcurrentHashMap<String, Long>> sequenceHistoryStorages = new HashMap<>();
 //    private Map<String, ConcurrentHashMap<String, Boolean>> sessionLockStorages = new HashMap<>();
     @Override
     public void createSessionHistory(String receiverSessionId) {
-        ConcurrentHashMap<String, Integer> seqHistory = new ConcurrentHashMap<>();
+        ConcurrentHashMap<String, Long> seqHistory = new ConcurrentHashMap<>();
         sequenceHistoryStorages.put(receiverSessionId, seqHistory);
     }
 
@@ -27,7 +26,7 @@ public class InMemoryOutboundChannelHistoryRepository implements OutboundChannel
         if(!sequenceHistoryStorages.containsKey(receiverSessionId)) {
             return;
         }
-        Map<String, Integer> seqHistory = sequenceHistoryStorages.get(receiverSessionId);
+        Map<String, Long> seqHistory = sequenceHistoryStorages.get(receiverSessionId);
         for(String senderSessionId : seqHistory.keySet()) {
             seqHistory.remove(senderSessionId);
         }
@@ -35,25 +34,25 @@ public class InMemoryOutboundChannelHistoryRepository implements OutboundChannel
     }
 
     @Override
-    public void updateSequence(String receiverSessionId, String senderSessionId, Integer seq) {
-        Map<String, Integer> seqHistory = sequenceHistoryStorages.get(receiverSessionId);
+    public void updateSequence(String receiverSessionId, String senderSessionId, Long seq) {
+        Map<String, Long> seqHistory = sequenceHistoryStorages.get(receiverSessionId);
         log.info("[SESSION HISTORY UPDATE] " + receiverSessionId + " <-- " + senderSessionId + ": #" + seq);
         seqHistory.put(senderSessionId, seq);
     }
 
     @Override
-    public int getSequence(String receiverSessionId, String senderSessionId) {
-        Integer seq = sequenceHistoryStorages.get(receiverSessionId).get(senderSessionId);
+    public long getSequence(String receiverSessionId, String senderSessionId) {
+        Long seq = sequenceHistoryStorages.get(receiverSessionId).get(senderSessionId);
         return seq;
     }
 
     @Override
-    public Map<String, Integer> getHistory(String outboundSessionId) {
+    public Map<String, Long> getHistory(String outboundSessionId) {
         return sequenceHistoryStorages.get(outboundSessionId);
     }
     @Override
     public boolean isSenderSessionExists(String receiverSessionId, String senderSessionId) {
-        Map<String, Integer> senderSessionsHistory = sequenceHistoryStorages.get(receiverSessionId);
+        Map<String, Long> senderSessionsHistory = sequenceHistoryStorages.get(receiverSessionId);
         if(senderSessionsHistory.containsKey(senderSessionId)) {
             return true;
         }
