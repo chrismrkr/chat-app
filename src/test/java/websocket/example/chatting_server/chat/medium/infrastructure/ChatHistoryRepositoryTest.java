@@ -56,7 +56,7 @@ public class ChatHistoryRepositoryTest {
         List<ChatHistory> byRoomId = chatHistoryRepository.findByRoomId(roomId);
 
         // then
-        Assertions.assertEquals(true, true);
+        Assertions.assertEquals(byRoomId.size(), chatHistoryNumber);
 
         // finally
         for(int i=0; i<chatHistoryNumber; i++) {

@@ -18,22 +18,9 @@ public class ChatHistoryRepositoryImpl implements ChatHistoryRepository {
     @Override
     public List<ChatHistory> findByRoomId(Long roomId) {
         List<ChatHistoryEntity> byRoomId = chatHistoryEsRepository.findByRoomId(roomId);
-        List<ChatHistory> list = byRoomId.stream()
+        return byRoomId.stream()
                 .map(ChatHistory::from)
                 .toList();
-        list.sort((history1, history2) -> {
-            long history1Timestamp = (history1.getSeq() >> ChatIdGenerateUtils.TIMESTAMP_SHIFT) & ChatIdGenerateUtils.TIMESTAMP_MASK;
-            long history1Serial = history1.getSeq() & ChatIdGenerateUtils.SEQUENCE_MASK;
-            long history2Timestamp = (history2.getSeq() >> ChatIdGenerateUtils.TIMESTAMP_SHIFT) & ChatIdGenerateUtils.TIMESTAMP_MASK;;
-            long history2Serial = history2.getSeq() & ChatIdGenerateUtils.SEQUENCE_MASK;;
-            if(history1Timestamp < history1Timestamp) return -1;
-            else if(history1Timestamp > history2Timestamp) return 1;
-            else {
-                if(history1Serial < history2Serial) return -1;
-                else return 1;
-            }
-        });
-        return list;
     }
 
     @Override
