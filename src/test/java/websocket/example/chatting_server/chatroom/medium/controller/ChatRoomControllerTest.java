@@ -12,8 +12,6 @@ import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.test.web.servlet.ResultActions;
-import websocket.example.chatting_server.chatRoom.controller.ChatRoomController;
 import websocket.example.chatting_server.chatRoom.controller.dto.ChatRoomEnterReqDto;
 import websocket.example.chatting_server.chatRoom.domain.ChatRoom;
 import websocket.example.chatting_server.chatRoom.domain.MemberChatRoom;
