@@ -1,6 +1,8 @@
 package websocket.example.chatting_server.chat.infrastructure.impl;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.elasticsearch.client.elc.ElasticsearchTemplate;
+
 import org.springframework.stereotype.Repository;
 import websocket.example.chatting_server.chat.domain.ChatHistory;
 import websocket.example.chatting_server.chat.infrastructure.ChatHistoryEsRepository;
@@ -15,6 +17,13 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class ChatHistoryRepositoryImpl implements ChatHistoryRepository {
     private final ChatHistoryEsRepository chatHistoryEsRepository;
+    private final ElasticsearchTemplate elasticsearchTemplate;
+
+    @Override
+    public List<ChatHistory> findByRoomIdOrderByTimestamp(Long roomId) {
+        return null;
+    }
+
     @Override
     public List<ChatHistory> findByRoomId(Long roomId) {
         List<ChatHistoryEntity> byRoomId = chatHistoryEsRepository.findByRoomId(roomId);

@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface ChatHistoryRepository {
+    List<ChatHistory> findByRoomIdOrderByTimestamp(Long roomId);
     List<ChatHistory> findByRoomId(Long roomId);
     ChatHistory save(ChatHistory chatHistory);
     Optional<ChatHistory> findBySeq(Long seq);

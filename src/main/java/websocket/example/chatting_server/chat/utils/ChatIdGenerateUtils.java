@@ -1,6 +1,10 @@
 package websocket.example.chatting_server.chat.utils;
 
 
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+
 public class ChatIdGenerateUtils {
     // Use Snowflake ID Generator
     private final long twepoch = 1288834974657L; // Epoch start timestamp
@@ -58,6 +62,18 @@ public class ChatIdGenerateUtils {
                 | (datacenterId << datacenterIdShift) // 64 << 17 -> 47 -> 5bit
                 | (workerId << workerIdShift) // 64 << 12 -> 52 -> 5bit
                 | sequence; // 12bit
+    }
+
+    public static long getTimestamp(long id) {
+        return (id >> TIMESTAMP_SHIFT) & TIMESTAMP_MASK;
+    }
+    public static long getSerial(long id) {
+        return id & SEQUENCE_MASK;
+    }
+    public static ZonedDateTime getDateTime(long timestamp) {
+        long epochMillis = 1288834974657L + timestamp;
+        Instant instant = Instant.ofEpochMilli(epochMillis);
+        return ZonedDateTime.ofInstant(instant, ZoneId.of("UTC"));
     }
 
     private long tilNextMillis(long lastTimestamp) {

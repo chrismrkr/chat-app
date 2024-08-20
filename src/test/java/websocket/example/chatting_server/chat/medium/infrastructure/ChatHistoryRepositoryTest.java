@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import websocket.example.chatting_server.chat.domain.ChatHistory;
 import websocket.example.chatting_server.chat.infrastructure.ChatHistoryRepository;
+import websocket.example.chatting_server.chat.utils.ChatIdGenerateUtils;
 
 import java.util.List;
 import java.util.Optional;
@@ -14,12 +15,14 @@ import java.util.Optional;
 public class ChatHistoryRepositoryTest {
     @Autowired
     ChatHistoryRepository chatHistoryRepository;
+    @Autowired
+    ChatIdGenerateUtils chatIdGenerateUtils;
 
     @Test
     void chatHistory_저장_후_seq로_조회() {
         // given
         ChatHistory chatHistory1 = ChatHistory.builder()
-                .seq(1825044961289043968L)
+                .seq(chatIdGenerateUtils.nextId()) // ex. 1825044961289043968L
                 .roomId(1L)
                 .senderName("name")
                 .message("hello world")
@@ -43,9 +46,11 @@ public class ChatHistoryRepositoryTest {
         // given
         int chatHistoryNumber = 50;
         long roomId = 2L;
+        long[] seqArr = new long[chatHistoryNumber];
         for(int i=0; i<chatHistoryNumber; i++) {
+            long seq = chatIdGenerateUtils.nextId();
             chatHistoryRepository.save(ChatHistory.builder()
-                    .seq(1825044961289043968L + i)
+                    .seq(seq)
                     .roomId(roomId)
                     .senderName("test")
                     .message("hello world")
@@ -60,7 +65,7 @@ public class ChatHistoryRepositoryTest {
 
         // finally
         for(int i=0; i<chatHistoryNumber; i++) {
-            chatHistoryRepository.deleteBySeq(1825044961289043968L + i);
+            chatHistoryRepository.deleteBySeq(seqArr[i]);
         }
         Assertions.assertEquals(chatHistoryRepository.findByRoomId(roomId).size(), 0);
     }

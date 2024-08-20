@@ -60,9 +60,9 @@ public class ChatIdGenerateUtilsTest {
             executorService.submit(() -> {
                 try {
                     long id = chatIdGenerateUtils.nextId();
-                    long timeStamp = (id >> TIMESTAMP_SHIFT) & TIMESTAMP_MASK;
-                    ZonedDateTime dateTime = getDateTime(timeStamp);
-                    long sequence = id & SEQUENCE_MASK;
+                    long timeStamp = ChatIdGenerateUtils.getTimestamp(id);
+                    ZonedDateTime dateTime = ChatIdGenerateUtils.getDateTime(timeStamp);
+                    long sequence = ChatIdGenerateUtils.getSerial(id);
                     TimestampAndSeq timestampAndSeq = new TimestampAndSeq(dateTime, timeStamp, sequence);
                     idList.add(timestampAndSeq);
                 } finally {
@@ -90,13 +90,6 @@ public class ChatIdGenerateUtilsTest {
                 Assertions.assertNotEquals(idList.get(i).seq, idList.get(i+1).seq);
             }
         }
-    }
-
-    private ZonedDateTime getDateTime(long timestamp) {
-        long EPOCH = 1609459200000L;
-        long epochMillis = EPOCH + timestamp;
-        Instant instant = Instant.ofEpochMilli(epochMillis);
-        return ZonedDateTime.ofInstant(instant, ZoneId.of("UTC"));
     }
 
     private static class TimestampAndSeq {
