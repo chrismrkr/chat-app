@@ -2,6 +2,8 @@ package websocket.example.chatting_server.chat.infrastructure.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
@@ -15,8 +17,10 @@ import java.time.Duration;
 @RequiredArgsConstructor
 public class RedisLockRepositoryImpl implements LockRepository {
     private final RedisTemplate redisTemplate;
+
     @Value("${spring.data.redis.lock.duration-millis}")
     private String lockDurationMillis;
+
     @Override
     public boolean holdLock(String key, String value) {
         ValueOperations valueOperations = redisTemplate.opsForValue();

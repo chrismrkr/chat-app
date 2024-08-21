@@ -84,17 +84,9 @@ public class DuplicatedMessageCheckInterceptor implements ChannelInterceptor {
             return true;
         }
         long exSeq = outboundChannelHistoryRepository.getSequence(receiverSessionId, senderSessionId);
-        long exTimestamp = (exSeq >> ChatIdGenerateUtils.TIMESTAMP_SHIFT) & ChatIdGenerateUtils.TIMESTAMP_MASK;
-        long exSerialNumber = exSeq & ChatIdGenerateUtils.SEQUENCE_MASK;
-        long newTimestamp = (newSeq >> ChatIdGenerateUtils.TIMESTAMP_SHIFT) & ChatIdGenerateUtils.TIMESTAMP_MASK;
-        long newSerialNumber = newSeq & ChatIdGenerateUtils.SEQUENCE_MASK;
-        if(exTimestamp < newTimestamp) {
+        if(newSeq > exSeq) {
             return true;
-        } else if(exTimestamp > newTimestamp) {
-            return false;
-        } else {
-            return exSerialNumber < newSerialNumber;
-        }
+        } else return false;
     }
 
     private boolean isMessageCommand(StompHeaderAccessor accessor) {

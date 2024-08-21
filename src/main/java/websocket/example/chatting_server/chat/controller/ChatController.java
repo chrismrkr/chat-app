@@ -8,6 +8,8 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.web.bind.annotation.*;
 import websocket.example.chatting_server.chat.controller.dto.ChatDto;
 
+import java.time.LocalDateTime;
+
 @RestController
 @RequiredArgsConstructor
 @CrossOrigin(origins = "*")
@@ -17,16 +19,10 @@ public class ChatController {
 
     @MessageMapping("/message/{roomId}") // pub : /app/message/{roomId}
     public void sendToMessageBroker(@RequestBody ChatDto chatDto, @DestinationVariable String roomId) throws Exception {
-        ChatDto dto = ChatDto.builder()
-                .roomId(Long.parseLong(roomId))
-                .message(chatDto.getMessage())
-                .senderName(chatDto.getSenderName())
-                .senderSessionId(chatDto.getSenderSessionId())
-                .seq(chatDto.getSeq())
-                .build();
+        chatDto.setRoomId(Long.parseLong(roomId));
         String exchange = env.getProperty("spring.rabbitmq.chat.exchange-name");
         String routingKey = env.getProperty("spring.rabbitmq.chat.routing-key") + roomId;
-        rabbitMQTemplate.convertAndSend(exchange, routingKey, dto);
+        rabbitMQTemplate.convertAndSend(exchange, routingKey, chatDto);
     }
 
 //    Kafka 사용 시 사용

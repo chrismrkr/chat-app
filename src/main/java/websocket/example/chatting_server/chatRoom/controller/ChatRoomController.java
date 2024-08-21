@@ -29,6 +29,7 @@ public class ChatRoomController {
         MemberChatRoom enter = chatRoomService.enter(dto.getMemberId(), dto.getRoomId());
         ChatRoomEnterResDto res = ChatRoomEnterResDto.builder()
                 .status("ENTER")
+                .enterAt(enter.getEnterDateTime())
                 .build();
         return new ResponseEntity<>(res, HttpStatus.OK);
     }

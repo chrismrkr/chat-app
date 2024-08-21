@@ -1,12 +1,16 @@
 package websocket.example.chatting_server.chat.infrastructure;
 
-import org.springframework.data.elasticsearch.annotations.Query;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.elasticsearch.repository.ElasticsearchRepository;
 import websocket.example.chatting_server.chat.infrastructure.entity.ChatHistoryEntity;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface ChatHistoryEsRepository extends ElasticsearchRepository<ChatHistoryEntity, Long> {
-    @Query("{\"bool\": {\"must\": [{\"match\": {\"roomId\": \"?0\"}}]}}")
+    List<ChatHistoryEntity> findByRoomIdAndSendTimeAfterOrderBySeq(Long roomId, LocalDateTime sendTime);
     List<ChatHistoryEntity> findByRoomId(Long roomId);
+    List<ChatHistoryEntity> findByRoomIdOrderBySeq(Long roomId);
+    Page<ChatHistoryEntity> findByRoomIdOrderBySeq(Long roomId, Pageable pageable);
 }

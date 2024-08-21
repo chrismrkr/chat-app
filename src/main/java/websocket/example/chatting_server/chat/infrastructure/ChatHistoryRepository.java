@@ -2,11 +2,13 @@ package websocket.example.chatting_server.chat.infrastructure;
 
 import websocket.example.chatting_server.chat.domain.ChatHistory;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
 public interface ChatHistoryRepository {
-    List<ChatHistory> findByRoomIdOrderByTimestamp(Long roomId);
+    List<ChatHistory> findByRoomIdAndSendTimeAfter(Long roomId, LocalDateTime at);
+    List<ChatHistory> findByRoomIdOrderBySeq(Long roomId);
     List<ChatHistory> findByRoomId(Long roomId);
     ChatHistory save(ChatHistory chatHistory);
     Optional<ChatHistory> findBySeq(Long seq);

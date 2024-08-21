@@ -16,6 +16,7 @@ import websocket.example.chatting_server.chat.controller.dto.ChatDto;
 import websocket.example.chatting_server.chat.utils.ChatIdGenerateUtils;
 
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
 
 @Slf4j
 @RequiredArgsConstructor

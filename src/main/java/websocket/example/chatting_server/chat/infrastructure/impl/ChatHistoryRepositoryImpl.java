@@ -10,6 +10,7 @@ import websocket.example.chatting_server.chat.infrastructure.ChatHistoryReposito
 import websocket.example.chatting_server.chat.infrastructure.entity.ChatHistoryEntity;
 import websocket.example.chatting_server.chat.utils.ChatIdGenerateUtils;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -17,11 +18,22 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class ChatHistoryRepositoryImpl implements ChatHistoryRepository {
     private final ChatHistoryEsRepository chatHistoryEsRepository;
-    private final ElasticsearchTemplate elasticsearchTemplate;
 
     @Override
-    public List<ChatHistory> findByRoomIdOrderByTimestamp(Long roomId) {
-        return null;
+    public List<ChatHistory> findByRoomIdAndSendTimeAfter(Long roomId, LocalDateTime at) {
+        List<ChatHistoryEntity> byRoomIdAndSendTimeAfter = chatHistoryEsRepository
+                .findByRoomIdAndSendTimeAfterOrderBySeq(roomId, at);
+        return byRoomIdAndSendTimeAfter.stream()
+                .map(ChatHistory::from)
+                .toList();
+    }
+
+    @Override
+    public List<ChatHistory> findByRoomIdOrderBySeq(Long roomId) {
+        List<ChatHistoryEntity> byRoomIdOrderBySeq = chatHistoryEsRepository.findByRoomIdOrderBySeq(roomId);
+        return byRoomIdOrderBySeq.stream()
+                .map(ChatHistory::from)
+                .toList();
     }
 
     @Override

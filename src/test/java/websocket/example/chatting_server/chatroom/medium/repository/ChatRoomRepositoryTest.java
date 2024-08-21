@@ -49,6 +49,7 @@ public class ChatRoomRepositoryTest {
         Assertions.assertEquals(1, byMemberId.size());
         Assertions.assertEquals(memberId, byMemberId.get(0).getMemberId());
         Assertions.assertEquals(chatRoom.getRoomId(), byMemberId.get(0).getChatRoom().getRoomId());
+        Assertions.assertNotNull(byMemberId.get(0).getEnterDateTime());
     }
 
     @Test
