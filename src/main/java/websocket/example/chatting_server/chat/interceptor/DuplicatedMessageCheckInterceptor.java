@@ -11,10 +11,12 @@ import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.messaging.support.MessageBuilder;
+import org.springframework.transaction.annotation.Transactional;
 import websocket.example.chatting_server.chat.controller.dto.ChatDto;
+import websocket.example.chatting_server.chat.domain.ChatHistory;
+import websocket.example.chatting_server.chat.infrastructure.ChatHistoryRepository;
 import websocket.example.chatting_server.chat.infrastructure.LockRepository;
 import websocket.example.chatting_server.chat.infrastructure.OutboundChannelHistoryRepository;
-import websocket.example.chatting_server.chat.utils.ChatIdGenerateUtils;
 
 import java.awt.*;
 import java.nio.charset.StandardCharsets;
@@ -25,14 +27,17 @@ public class DuplicatedMessageCheckInterceptor implements ChannelInterceptor {
     private final ObjectMapper objectMapper;
     private final OutboundChannelHistoryRepository outboundChannelHistoryRepository;
     private final LockRepository lockRepository;
+    private final ChatHistoryRepository chatHistoryRepository;
     @Override
+    @Transactional
     public Message<?> preSend(Message<?> message, MessageChannel channel) {
         StompHeaderAccessor accessor = StompHeaderAccessor.wrap(message);
+        ChatDto chatDto = null;
         if(!isMessageCommand(accessor)) {
             return message;
         }
         try {
-            ChatDto chatDto = fromPayload(message);
+            chatDto = fromPayload(message);
             String senderSessionId = chatDto.getSenderSessionId();
             String receiverSessionId = accessor.getSessionId();
 
@@ -51,6 +56,13 @@ public class DuplicatedMessageCheckInterceptor implements ChannelInterceptor {
             }
         }  catch (JsonProcessingException e) {
             return message;
+        }
+
+        ChatHistory history = ChatHistory.from(chatDto);
+        try {
+            chatHistoryRepository.save(history);
+        } catch (Exception e) {
+            // TODO. 실패 시 Rollback 필요
         }
         return message;
     }

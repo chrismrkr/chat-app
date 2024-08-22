@@ -31,6 +31,7 @@ services:
       - chat-app-db
       - chat-app-rabbitmq
       - chat-app-redis
+      - chat-app-es
     restart: always
 
   chat-app-backend2:
@@ -53,6 +54,7 @@ services:
       - chat-app-db
       - chat-app-rabbitmq
       - chat-app-redis
+      - chat-app-es
     restart: always
 
   chat-app-rabbitmq:

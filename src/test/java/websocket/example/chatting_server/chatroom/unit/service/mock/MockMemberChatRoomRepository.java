@@ -4,6 +4,7 @@ import websocket.example.chatting_server.chatRoom.domain.ChatRoom;
 import websocket.example.chatting_server.chatRoom.domain.MemberChatRoom;
 import websocket.example.chatting_server.chatRoom.infrastructure.MemberChatRoomRepository;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -15,6 +16,7 @@ public class MockMemberChatRoomRepository implements MemberChatRoomRepository {
         MemberChatRoom build = MemberChatRoom.builder()
                 .memberId(memberId)
                 .chatRoom(chatRoom)
+                .enterDateTime(LocalDateTime.now())
                 .build();
         datas.add(build);
         return build;
@@ -32,6 +34,15 @@ public class MockMemberChatRoomRepository implements MemberChatRoomRepository {
                         memberChatRoom.getMemberId() == memberId && memberChatRoom.getChatRoom().getRoomId() == roomId)
                 .findAny();
         return any;
+    }
+
+    @Override
+    public Optional<LocalDateTime> findEnterDateTime(Long memberId, Long roomId) {
+        return datas.stream()
+                .filter(memberChatRoom ->
+                        memberChatRoom.getMemberId() == memberId && memberChatRoom.getChatRoom().getRoomId() == roomId)
+                .findAny()
+                .map(MemberChatRoom::getEnterDateTime);
     }
 
     @Override

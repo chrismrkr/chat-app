@@ -4,15 +4,23 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.Rollback;
+import websocket.example.chatting_server.chat.controller.dto.ChatDto;
+import websocket.example.chatting_server.chat.domain.ChatHistory;
+import websocket.example.chatting_server.chat.infrastructure.ChatHistoryRepository;
+import websocket.example.chatting_server.chat.service.ChatHistoryService;
+import websocket.example.chatting_server.chat.utils.ChatIdGenerateUtils;
 import websocket.example.chatting_server.chatRoom.domain.ChatRoom;
 import websocket.example.chatting_server.chatRoom.infrastructure.ChatRoomRepository;
 import websocket.example.chatting_server.chatRoom.infrastructure.MemberChatRoomRepository;
 import websocket.example.chatting_server.chatRoom.service.ChatRoomService;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 @SpringBootTest
+@Rollback
 public class ChatRoomServiceTest {
     @Autowired
     ChatRoomService chatRoomService;
@@ -20,6 +28,12 @@ public class ChatRoomServiceTest {
     ChatRoomRepository chatRoomRepository;
     @Autowired
     MemberChatRoomRepository memberChatRoomRepository;
+    @Autowired
+    ChatHistoryService chatHistoryService;
+    @Autowired
+    ChatHistoryRepository chatHistoryRepository;
+    @Autowired
+    ChatIdGenerateUtils chatIdGenerateUtils;
 
     @Test
     void chatroom_신규_생성() {
@@ -154,5 +168,52 @@ public class ChatRoomServiceTest {
         Assertions.assertEquals(byMemberId1.size(), 2);
         Assertions.assertEquals(byMemberId2.size(), 1);
         Assertions.assertEquals(byMemberId2.get(0).getRoomName(), roomNames[2]);
+    }
+
+    @Test
+    void chatRoom의_History를_RoomId_및_입장시간을_조건으로_조회() throws InterruptedException {
+        // given
+        Long memberId = 12L;
+        Long newMemberId = 13L;
+        String roomName = "room12";
+        ChatRoom chatRoom = chatRoomService.create(memberId, roomName);
+        List<Long> seqList = new ArrayList<>();
+
+        for(int i=0; i<10; i++) {
+            long seq = chatIdGenerateUtils.nextId();
+            ChatHistory write = chatHistoryService.write(
+                    ChatDto.builder()
+                            .seq(seq)
+                            .roomId(chatRoom.getRoomId())
+                            .senderName("member")
+                            .message("hello")
+                            .build()
+            );
+            seqList.add(seq);
+        }
+
+        // when
+        Thread.sleep(100);
+        chatRoomService.enter(newMemberId, chatRoom.getRoomId());
+        Thread.sleep(100);
+        for(int i=0; i<100; i++) {
+            long seq = chatIdGenerateUtils.nextId();
+            chatHistoryService.write(
+                    ChatDto.builder()
+                            .seq(seq)
+                            .roomId(chatRoom.getRoomId())
+                            .senderName("member")
+                            .message("hello")
+                            .build()
+            );
+            seqList.add(seq);
+        }
+
+        // then
+        List<ChatHistory> chatHistories = chatRoomService.readChatHistory(newMemberId, chatRoom.getRoomId());
+        Assertions.assertEquals(chatHistories.size(), 100);
+        for(Long seq : seqList) {
+            chatHistoryRepository.deleteBySeq(seq);
+        }
     }
 }

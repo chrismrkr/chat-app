@@ -81,7 +81,7 @@ public class RabbitMQMessageBrokerConfig {
         rabbitTemplate.setMessageConverter(jsonMessageConverter());
         rabbitTemplate.setConfirmCallback(((correlationData, ack, cause) -> {
             if(ack) {
-                log.info("[MESSAGE PUBLISH CONFIRM SUCCESS] {}", correlationData);
+
             } else {
                 log.info("[MESSAGE PUBLISH CONFIRM FAIL] {}", cause);
             }

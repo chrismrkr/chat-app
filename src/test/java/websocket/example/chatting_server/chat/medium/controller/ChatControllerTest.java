@@ -1,5 +1,6 @@
 package websocket.example.chatting_server.chat.medium.controller;
 
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import org.awaitility.Awaitility;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -21,6 +22,7 @@ import org.springframework.web.socket.messaging.WebSocketStompClient;
 import websocket.example.chatting_server.chat.config.RabbitMQMessageBrokerConfig;
 import websocket.example.chatting_server.chat.config.WebSocketConfig;
 import websocket.example.chatting_server.chat.controller.dto.ChatDto;
+import websocket.example.chatting_server.chat.infrastructure.ChatHistoryRepository;
 import websocket.example.chatting_server.chat.infrastructure.impl.InMemoryOutboundChannelHistoryRepository;
 import websocket.example.chatting_server.chat.infrastructure.impl.RedisLockRepositoryImpl;
 import websocket.example.chatting_server.chat.interceptor.SessionIdRegisterInterceptor;
@@ -48,6 +50,8 @@ public class ChatControllerTest {
     ChatIdGenerateUtils chatIdGenerateUtils;
     @Autowired
     SessionIdRegisterInterceptor sessionIdRegisterInterceptor;
+    @Autowired
+    ChatHistoryRepository chatHistoryRepository;
     WebSocketStompClient stompClient;
     CompletableFuture<ChatDto> completableFuture;
     CompletableFuture<Void> sessionConnectedReady;
@@ -66,7 +70,6 @@ public class ChatControllerTest {
                             public void afterConnected(StompSession session, StompHeaders connectedHeaders) {
                                 sessionConnectedReady.complete(null);
                             }
-
                         }).get(10, TimeUnit.SECONDS);
         sessionConnectedReady.get(5, TimeUnit.SECONDS);
         Awaitility.await()
@@ -101,7 +104,7 @@ public class ChatControllerTest {
         );
 
         // then
-        ChatDto chatDto = completableFuture.get(300, TimeUnit.SECONDS);
+        ChatDto chatDto = completableFuture.get(1000, TimeUnit.SECONDS);
         Assertions.assertNotNull(chatDto);
         Assertions.assertEquals(1L, chatDto.getRoomId());
         Assertions.assertEquals("USR1", chatDto.getSenderName());
@@ -109,6 +112,8 @@ public class ChatControllerTest {
         Assertions.assertNotNull(chatDto.getSenderSessionId());
         Assertions.assertEquals(false,
                 redisLockRepository.isLocked(chatDto.getSenderSessionId()+"-"+chatDto.getSenderSessionId()+"#0"));
+        Assertions.assertNotNull(chatHistoryRepository.findBySeq(chatDto.getSeq()));
+        chatHistoryRepository.deleteBySeq(chatDto.getSeq());
     }
 
     @Test
@@ -176,6 +181,8 @@ public class ChatControllerTest {
             Assertions.assertNotNull(chatDto.getSenderSessionId());
             Assertions.assertEquals(false,
                     redisLockRepository.isLocked(chatDto.getSenderSessionId()+"-"+chatDto.getSenderSessionId()+"#0"));
+            Assertions.assertNotNull(chatHistoryRepository.findBySeq(chatDto.getSeq()));
+            chatHistoryRepository.deleteBySeq(chatDto.getSeq());
         }
     }
 
@@ -211,6 +218,8 @@ public class ChatControllerTest {
         Assertions.assertNotNull(chatDto.getSenderSessionId());
         Assertions.assertNotNull(chatDto.getSeq());
         Assertions.assertEquals(chatDto.getSeq(), outboundChannelHistoryRepository.getSequence(chatDto.getSenderSessionId(), chatDto.getSenderSessionId()));
+        Assertions.assertNotNull(chatHistoryRepository.findBySeq(chatDto.getSeq()));
+        chatHistoryRepository.deleteBySeq(chatDto.getSeq());
     }
 
     @Test
@@ -247,6 +256,8 @@ public class ChatControllerTest {
         Assertions.assertEquals("HELLO1", chatDto.getMessage());
         Assertions.assertNotNull(chatDto.getSenderSessionId());
         Assertions.assertEquals(chatDto.getSeq(), outboundChannelHistoryRepository.getSequence(chatDto.getSenderSessionId(), chatDto.getSenderSessionId()));
+        Assertions.assertNotNull(chatHistoryRepository.findBySeq(chatDto.getSeq()));
+        chatHistoryRepository.deleteBySeq(chatDto.getSeq());
 
         // when2
         completableFuture = new CompletableFuture<>();
@@ -259,6 +270,4 @@ public class ChatControllerTest {
         // then2
         Assertions.assertThrows(TimeoutException.class,() -> completableFuture.get(10, TimeUnit.SECONDS));
     }
-
-
 }

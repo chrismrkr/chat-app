@@ -2,6 +2,7 @@ package websocket.example.chatting_server.chat.domain;
 
 import lombok.Builder;
 import lombok.Getter;
+import websocket.example.chatting_server.chat.controller.dto.ChatDto;
 import websocket.example.chatting_server.chat.infrastructure.entity.ChatHistoryEntity;
 
 import java.time.LocalDateTime;
@@ -29,6 +30,15 @@ public class ChatHistory {
                 .senderName(entity.getSenderName())
                 .message(entity.getMessage())
                 .sendTime(entity.getSendTime())
+                .build();
+    }
+    public static ChatHistory from(ChatDto chatDto) {
+        return ChatHistory.builder()
+                .seq(chatDto.getSeq())
+                .roomId(chatDto.getRoomId())
+                .senderName(chatDto.getSenderName())
+                .message(chatDto.getMessage())
+                .sendTime(LocalDateTime.now())
                 .build();
     }
     public ChatHistoryEntity toEntity() {

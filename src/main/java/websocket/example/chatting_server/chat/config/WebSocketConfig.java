@@ -11,6 +11,7 @@ import org.springframework.messaging.simp.config.MessageBrokerRegistry;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.web.socket.config.annotation.*;
 import org.springframework.beans.factory.annotation.Value;
+import websocket.example.chatting_server.chat.infrastructure.ChatHistoryRepository;
 import websocket.example.chatting_server.chat.infrastructure.LockRepository;
 import websocket.example.chatting_server.chat.infrastructure.OutboundChannelHistoryRepository;
 import websocket.example.chatting_server.chat.interceptor.DuplicatedMessageCheckInterceptor;
@@ -25,6 +26,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     private final OutboundChannelHistoryRepository outboundChannelHistoryRepository;
     private final LockRepository lockRepository;
     private final ChatIdGenerateUtils chatIdGenerateUtils;
+    private final ChatHistoryRepository chatHistoryRepository;
     @Value("${spring.rabbitmq.host}")
     private String rabbitmqHost;
     @Value("${spring.rabbitmq.relay-port}")
@@ -56,7 +58,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     }
     @Bean
     public DuplicatedMessageCheckInterceptor duplicatedMessageCheckInterceptor() {
-        return new DuplicatedMessageCheckInterceptor(objectMapper, outboundChannelHistoryRepository, lockRepository);
+        return new DuplicatedMessageCheckInterceptor(objectMapper, outboundChannelHistoryRepository, lockRepository, chatHistoryRepository);
     }
 
     @Override

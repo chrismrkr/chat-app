@@ -7,6 +7,7 @@ import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.web.bind.annotation.*;
 import websocket.example.chatting_server.chat.controller.dto.ChatDto;
+import websocket.example.chatting_server.chat.service.ChatHistoryService;
 
 import java.time.LocalDateTime;
 
@@ -16,6 +17,7 @@ import java.time.LocalDateTime;
 public class ChatController {
     private final RabbitTemplate rabbitMQTemplate;
     private final Environment env;
+    private final ChatHistoryService chatHistoryService;
 
     @MessageMapping("/message/{roomId}") // pub : /app/message/{roomId}
     public void sendToMessageBroker(@RequestBody ChatDto chatDto, @DestinationVariable String roomId) throws Exception {

@@ -10,7 +10,6 @@ import websocket.example.chatting_server.chat.utils.ChatIdGenerateUtils;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 @SpringBootTest
 public class ChatHistoryRepositoryTest {

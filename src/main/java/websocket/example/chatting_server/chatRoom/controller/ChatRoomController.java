@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import websocket.example.chatting_server.chat.domain.ChatHistory;
 import websocket.example.chatting_server.chatRoom.controller.dto.*;
 import websocket.example.chatting_server.chatRoom.domain.MemberChatRoom;
 import websocket.example.chatting_server.chatRoom.service.ChatRoomService;
@@ -53,5 +54,11 @@ public class ChatRoomController {
     public ResponseEntity<ChatRoomListResDto> handleGettingMyChatroom(@PathVariable String memberId) {
         List<ChatRoom> byMemberId = chatRoomService.findByMemberId(Long.parseLong(memberId));
         return new ResponseEntity<>(new ChatRoomListResDto(byMemberId.size(), byMemberId), HttpStatus.OK);
+    }
+
+    @GetMapping("/history/{roomId}/{memberId}")
+    public ResponseEntity<ChatHistoriesResponse> getChatroomHistories(@PathVariable Long memberId, @PathVariable Long roomId) {
+        List<ChatHistory> chatHistories = chatRoomService.readChatHistory(memberId, roomId);
+        return new ResponseEntity<>(new ChatHistoriesResponse(roomId, chatHistories), HttpStatus.OK);
     }
 }

@@ -10,6 +10,7 @@ import websocket.example.chatting_server.chatRoom.infrastructure.MemberChatRoomR
 import websocket.example.chatting_server.chatRoom.infrastructure.entity.MemberChatRoomEntity;
 import websocket.example.chatting_server.chatRoom.infrastructure.entity.compositeKey.MemberChatRoomId;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -53,8 +54,13 @@ public class MemberChatRoomRepositoryImpl implements MemberChatRoomRepository {
     @Override
     @Transactional
     public Optional<MemberChatRoom> findByMemberAndRoomId(Long memberId, Long roomId) {
-        Optional<MemberChatRoom> memberChatRoom = memberChatRoomJpaRepository.findById(new MemberChatRoomId(memberId, roomId))
+        return memberChatRoomJpaRepository.findById(new MemberChatRoomId(memberId, roomId))
                 .map(MemberChatRoom::from);
-        return memberChatRoom;
+    }
+
+    @Override
+    public Optional<LocalDateTime> findEnterDateTime(Long memberId, Long roomId) {
+        return memberChatRoomJpaRepository.findById(new MemberChatRoomId(memberId, roomId))
+                .map(MemberChatRoomEntity::getEnterDateTime);
     }
 }
