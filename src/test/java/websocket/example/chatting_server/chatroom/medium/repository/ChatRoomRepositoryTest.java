@@ -200,7 +200,24 @@ public class ChatRoomRepositoryTest {
         chatRoomRepository.findById(chatRoom.getRoomId())
         , Optional.empty());
     }
+    @Test
+    void 동일한_memberChatRoom을_2번_저장해도_최초_생성일이_변경되지_않음() throws InterruptedException {
+        // given
+        String roomName = "chatroomrepotest-room13";
+        ChatRoom chatRoom = chatRoomRepository.create(roomName);
+        Long memberId = 15L;
 
+        // when
+        MemberChatRoom memberChatRoom1 = memberChatRoomRepository.addMemberInChatRoom(memberId, chatRoom);
+        Thread.sleep(600);
+        MemberChatRoom memberChatRoom2 = memberChatRoomRepository.addMemberInChatRoom(memberId, chatRoom);
+        Thread.sleep(600);
+
+        // then
+        MemberChatRoom find = memberChatRoomRepository.findByMemberAndRoomId(memberId, chatRoom.getRoomId())
+                .get();
+        Assertions.assertEquals(find.getEnterDateTime().getSecond(), memberChatRoom1.getEnterDateTime().getSecond());
+    }
     @Transactional
     private ChatRoom joinChatRoom(String roomName, Long[] memberIds) {
         ChatRoom chatRoom = chatRoomRepository.create(roomName);

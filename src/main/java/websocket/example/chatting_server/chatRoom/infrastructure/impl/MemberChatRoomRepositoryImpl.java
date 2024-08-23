@@ -20,6 +20,7 @@ public class MemberChatRoomRepositoryImpl implements MemberChatRoomRepository {
     private final MemberChatRoomJpaRepository memberChatRoomJpaRepository;
 
     @Override
+    @Transactional
     public MemberChatRoom addMemberInChatRoom(Long memberId, ChatRoom chatRoom) {
         MemberChatRoom memberChatRoom = MemberChatRoom.builder()
                 .memberId(memberId)
