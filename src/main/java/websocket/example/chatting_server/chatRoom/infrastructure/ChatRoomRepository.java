@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface ChatRoomRepository {
+    Optional<ChatRoom> findByIdWithParticipants(Long roomId);
     Optional<ChatRoom> findById(Long roomId);
     List<ChatRoom> findAll();
     ChatRoom create(String roomName);

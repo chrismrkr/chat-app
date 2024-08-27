@@ -35,7 +35,8 @@ public class ChatRoomRepositoryTest {
         Long memberId = 1L;
         // when
         ChatRoom chatRoom = chatRoomRepository.create(roomName);
-        MemberChatRoom memberChatRoom = memberChatRoomRepository.addMemberInChatRoom(memberId, chatRoom);
+        MemberChatRoom participate = chatRoom.participate(memberId);
+        memberChatRoomRepository.save(participate);
         em.flush();
         em.clear();
 
@@ -101,7 +102,8 @@ public class ChatRoomRepositoryTest {
         Long memberId = 6L;
         for(String roomName : roomNames) {
             ChatRoom chatRoom = chatRoomRepository.create(roomName);
-            memberChatRoomRepository.addMemberInChatRoom(memberId, chatRoom);
+            MemberChatRoom participate = chatRoom.participate(memberId);
+            memberChatRoomRepository.save(participate);
         }
         em.flush();
         em.clear();
@@ -208,22 +210,25 @@ public class ChatRoomRepositoryTest {
         Long memberId = 15L;
 
         // when
-        MemberChatRoom memberChatRoom1 = memberChatRoomRepository.addMemberInChatRoom(memberId, chatRoom);
+        MemberChatRoom participate1 = chatRoom.participate(memberId);
+        memberChatRoomRepository.save(participate1);
         Thread.sleep(600);
-        MemberChatRoom memberChatRoom2 = memberChatRoomRepository.addMemberInChatRoom(memberId, chatRoom);
+        MemberChatRoom participate2 = chatRoom.participate(memberId);
+        memberChatRoomRepository.save(participate2);
         Thread.sleep(600);
 
         // then
         MemberChatRoom find = memberChatRoomRepository
                                 .findByMemberAndRoomId(memberId, chatRoom.getRoomId())
                                 .get();
-        Assertions.assertEquals(find.getEnterDateTime().getSecond(), memberChatRoom1.getEnterDateTime().getSecond());
+        Assertions.assertEquals(find.getEnterDateTime().getSecond(), participate1.getEnterDateTime().getSecond());
     }
     @Transactional
     private ChatRoom joinChatRoom(String roomName, Long[] memberIds) {
         ChatRoom chatRoom = chatRoomRepository.create(roomName);
         for(Long memberId : memberIds) {
-            memberChatRoomRepository.addMemberInChatRoom(memberId, chatRoom);
+            MemberChatRoom participate = chatRoom.participate(memberId);
+            memberChatRoomRepository.save(participate);
         }
         return chatRoom;
     }

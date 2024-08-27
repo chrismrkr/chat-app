@@ -20,14 +20,9 @@ public class MemberChatRoomRepositoryImpl implements MemberChatRoomRepository {
     private final MemberChatRoomJpaRepository memberChatRoomJpaRepository;
 
     @Override
-    @Transactional
-    public MemberChatRoom addMemberInChatRoom(Long memberId, ChatRoom chatRoom) {
-        MemberChatRoom memberChatRoom = MemberChatRoom.builder()
-                .memberId(memberId)
-                .chatRoom(chatRoom)
-                .build();
-        MemberChatRoomEntity save = memberChatRoomJpaRepository.save(memberChatRoom.toEntity());
-        return MemberChatRoom.from(save);
+    public MemberChatRoom save(MemberChatRoom memberChatRoom) {
+        MemberChatRoomEntity entity = memberChatRoomJpaRepository.save(memberChatRoom.toEntity());
+        return MemberChatRoom.from(entity);
     }
 
     @Override

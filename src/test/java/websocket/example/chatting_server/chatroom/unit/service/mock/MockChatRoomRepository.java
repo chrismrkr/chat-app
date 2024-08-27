@@ -11,9 +11,15 @@ import java.util.concurrent.atomic.AtomicLong;
 public class MockChatRoomRepository implements ChatRoomRepository {
     private List<ChatRoom> datas = new ArrayList<>();
     private static AtomicLong ID_GEN = new AtomicLong(1L);
+
+    @Override
+    public Optional<ChatRoom> findByIdWithParticipants(Long roomId) {
+        return datas.stream().filter(chatRoom -> chatRoom.getRoomId() == roomId)
+                .findAny();
+    }
+
     @Override
     public Optional<ChatRoom> findById(Long roomId) {
-
         return datas.stream().filter(chatRoom -> chatRoom.getRoomId() == roomId)
                 .findAny();
     }

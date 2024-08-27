@@ -14,6 +14,13 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class ChatRoomRepositoryImpl implements ChatRoomRepository {
     private final ChatRoomJpaRepository chatRoomJpaRepository;
+
+    @Override
+    public Optional<ChatRoom> findByIdWithParticipants(Long roomId) {
+        return chatRoomJpaRepository.findByIdWithChatRoom(roomId)
+                .map(ChatRoom::from);
+    }
+
     @Override
     public Optional<ChatRoom> findById(Long roomId) {
         return chatRoomJpaRepository.findById(roomId)

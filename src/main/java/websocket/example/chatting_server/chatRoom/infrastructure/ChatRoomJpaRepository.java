@@ -1,8 +1,16 @@
 package websocket.example.chatting_server.chatRoom.infrastructure;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import websocket.example.chatting_server.chatRoom.infrastructure.entity.ChatRoomEntity;
 
-public interface ChatRoomJpaRepository extends JpaRepository<ChatRoomEntity, Long> {
+import java.util.Optional;
 
+public interface ChatRoomJpaRepository extends JpaRepository<ChatRoomEntity, Long> {
+    @Query(value = "SELECT c " +
+                    "FROM ChatRoomEntity c " +
+                    "JOIN FETCH c.memberChatRoomEntities " +
+                    "WHERE c.roomId = :roomId")
+    Optional<ChatRoomEntity> findByIdWithChatRoom(@Param("roomId")Long roomId);
 }

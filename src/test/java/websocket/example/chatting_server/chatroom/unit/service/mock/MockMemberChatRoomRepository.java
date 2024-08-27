@@ -11,15 +11,12 @@ import java.util.Optional;
 
 public class MockMemberChatRoomRepository implements MemberChatRoomRepository {
     private List<MemberChatRoom> datas = new ArrayList<>();
+
+
     @Override
-    public MemberChatRoom addMemberInChatRoom(Long memberId, ChatRoom chatRoom) {
-        MemberChatRoom build = MemberChatRoom.builder()
-                .memberId(memberId)
-                .chatRoom(chatRoom)
-                .enterDateTime(LocalDateTime.now())
-                .build();
-        datas.add(build);
-        return build;
+    public MemberChatRoom save(MemberChatRoom memberChatRoom) {
+        datas.add(memberChatRoom);
+        return memberChatRoom;
     }
 
     @Override

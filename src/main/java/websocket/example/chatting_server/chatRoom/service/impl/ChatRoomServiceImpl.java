@@ -15,6 +15,7 @@ import websocket.example.chatting_server.chatRoom.service.ChatRoomService;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -42,28 +43,37 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     }
 
     @Override
-    @Transactional
     public ChatRoom create(Long memberId, String roomName) {
         ChatRoom newChatRoom = chatRoomRepository.create(roomName);
-        MemberChatRoom memberChatRoom = memberChatRoomRepository.addMemberInChatRoom(memberId, newChatRoom);
+        MemberChatRoom participate = newChatRoom.participate(memberId);
+        memberChatRoomRepository.save(participate);
         return newChatRoom;
     }
 
     @Override
-    @Transactional
     public MemberChatRoom enter(Long memberId, Long roomId) {
         ChatRoom chatRoom = chatRoomRepository.findById(roomId)
                 .orElseThrow(() -> new IllegalArgumentException("[INVALID ROOM ID]: ROOM NOT FOUND BY " + roomId));
-        MemberChatRoom memberChatRoom = memberChatRoomRepository.addMemberInChatRoom(memberId, chatRoom);
-        return memberChatRoom;
+        MemberChatRoom participate = chatRoom.participate(memberId);
+        memberChatRoomRepository.save(participate);
+        return participate;
     }
 
     @Override
+    @Transactional
     public void exit(Long memberId, Long roomId) {
-        MemberChatRoom memberChatRoom = memberChatRoomRepository.findByMemberAndRoomId(memberId, roomId)
-                .orElseThrow(() -> new IllegalArgumentException("[INVALID MEMBER OR ROOM ID]: ID NOT MATCHED"));
-        memberChatRoomRepository.deleteMemberChatroomMapping(memberChatRoom);
-        checkIsVacantRoom(roomId);
+        ChatRoom chatRoom = chatRoomRepository.findByIdWithParticipants(roomId)
+                .orElseThrow(() -> new IllegalArgumentException("[INVALID ROOM ID]: ROOM NOT FOUND BY " + roomId));
+
+        Optional<MemberChatRoom> participant = chatRoom.findParticipants(memberId);
+        if(participant.isPresent() && chatRoom.exit(participant.get())) {
+            memberChatRoomRepository.deleteMemberChatroomMapping(participant.get());
+        }
+
+        Set<MemberChatRoom> participants = chatRoom.getParticipants();
+        if(participants.isEmpty()) {
+            chatRoomRepository.delete(chatRoom);
+        }
     }
 
     @Override
@@ -71,13 +81,5 @@ public class ChatRoomServiceImpl implements ChatRoomService {
         LocalDateTime enterDateTime = memberChatRoomRepository.findEnterDateTime(memberId, roomId)
                 .orElseThrow(() -> new IllegalArgumentException("[INVALID MEMBER OR ROOM ID] NOT FOUND"));
         return chatHistoryRepository.findByRoomIdAndSendTimeAfter(roomId, enterDateTime);
-    }
-
-    @Transactional
-    private void checkIsVacantRoom(Long roomId) {
-        List<MemberChatRoom> byRoomId = memberChatRoomRepository.findByRoomId(roomId);
-        if(byRoomId == null || byRoomId.isEmpty()) {
-            chatRoomRepository.delete(roomId);
-        }
     }
 }
