@@ -26,6 +26,7 @@ services:
       SPRING_DATA_REDIS_HOST: chat-app-redis
       SPRING_DATA_REDIS_PORT: 6379
       SPRING_DATA_REDIS_DURATION-MILLIS: 10000
+      SPRING_ELASTICSEARCH_URIS: http://chat-app-es:9200
 
     depends_on:
       - chat-app-db
@@ -50,6 +51,7 @@ services:
       SPRING_DATA_REDIS_HOST: chat-app-redis
       SPRING_DATA_REDIS_PORT: 6379
       SPRING_DATA_REDIS_DURATION-MILLIS: 10000
+      SPRING_ELASTICSEARCH_URIS: http://chat-app-es:9200
     depends_on:
       - chat-app-db
       - chat-app-rabbitmq

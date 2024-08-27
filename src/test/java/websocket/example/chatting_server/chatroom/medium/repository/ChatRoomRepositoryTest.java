@@ -214,8 +214,9 @@ public class ChatRoomRepositoryTest {
         Thread.sleep(600);
 
         // then
-        MemberChatRoom find = memberChatRoomRepository.findByMemberAndRoomId(memberId, chatRoom.getRoomId())
-                .get();
+        MemberChatRoom find = memberChatRoomRepository
+                                .findByMemberAndRoomId(memberId, chatRoom.getRoomId())
+                                .get();
         Assertions.assertEquals(find.getEnterDateTime().getSecond(), memberChatRoom1.getEnterDateTime().getSecond());
     }
     @Transactional
