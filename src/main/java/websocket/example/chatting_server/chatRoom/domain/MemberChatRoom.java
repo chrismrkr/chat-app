@@ -1,9 +1,6 @@
 package websocket.example.chatting_server.chatRoom.domain;
 
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import websocket.example.chatting_server.chatRoom.infrastructure.entity.ChatRoomEntity;
 import websocket.example.chatting_server.chatRoom.infrastructure.entity.MemberChatRoomEntity;
 
@@ -11,6 +8,7 @@ import java.time.LocalDateTime;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
+@EqualsAndHashCode
 public class MemberChatRoom {
     private Long memberId;
     private ChatRoom chatRoom;

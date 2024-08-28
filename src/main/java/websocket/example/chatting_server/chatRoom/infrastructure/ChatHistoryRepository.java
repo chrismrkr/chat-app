@@ -1,6 +1,6 @@
-package websocket.example.chatting_server.chat.infrastructure;
+package websocket.example.chatting_server.chatRoom.infrastructure;
 
-import websocket.example.chatting_server.chat.domain.ChatHistory;
+import websocket.example.chatting_server.chatRoom.domain.ChatHistory;
 
 import java.time.LocalDateTime;
 import java.util.List;

@@ -58,7 +58,7 @@ public class ChatRoomDomainTest {
                         .build());
 
         // when
-        ChatRoom from = ChatRoom.from(chatRoomEntity);
+        ChatRoom from = ChatRoom.fromWithParticipants(chatRoomEntity);
 
         // then
         Assertions.assertEquals(from.getParticipants().size(), 1);

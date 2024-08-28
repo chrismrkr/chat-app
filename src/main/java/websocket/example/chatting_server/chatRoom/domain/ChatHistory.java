@@ -1,9 +1,9 @@
-package websocket.example.chatting_server.chat.domain;
+package websocket.example.chatting_server.chatRoom.domain;
 
 import lombok.Builder;
 import lombok.Getter;
 import websocket.example.chatting_server.chat.controller.dto.ChatDto;
-import websocket.example.chatting_server.chat.infrastructure.entity.ChatHistoryEntity;
+import websocket.example.chatting_server.chatRoom.infrastructure.entity.ChatHistoryEntity;
 
 import java.time.LocalDateTime;
 

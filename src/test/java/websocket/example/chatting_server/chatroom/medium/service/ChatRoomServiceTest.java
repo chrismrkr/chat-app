@@ -6,11 +6,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.Rollback;
 import websocket.example.chatting_server.chat.controller.dto.ChatDto;
-import websocket.example.chatting_server.chat.domain.ChatHistory;
-import websocket.example.chatting_server.chat.infrastructure.ChatHistoryRepository;
-import websocket.example.chatting_server.chat.service.ChatHistoryService;
+import websocket.example.chatting_server.chatRoom.domain.ChatHistory;
+import websocket.example.chatting_server.chatRoom.infrastructure.ChatHistoryRepository;
 import websocket.example.chatting_server.chat.utils.ChatIdGenerateUtils;
 import websocket.example.chatting_server.chatRoom.domain.ChatRoom;
+import websocket.example.chatting_server.chatRoom.domain.MemberChatRoom;
 import websocket.example.chatting_server.chatRoom.infrastructure.ChatRoomRepository;
 import websocket.example.chatting_server.chatRoom.infrastructure.MemberChatRoomRepository;
 import websocket.example.chatting_server.chatRoom.service.ChatRoomService;
@@ -29,14 +29,12 @@ public class ChatRoomServiceTest {
     @Autowired
     MemberChatRoomRepository memberChatRoomRepository;
     @Autowired
-    ChatHistoryService chatHistoryService;
-    @Autowired
     ChatHistoryRepository chatHistoryRepository;
     @Autowired
     ChatIdGenerateUtils chatIdGenerateUtils;
 
     @Test
-    void chatroom_신규_생성() {
+    void chatroom_신규_생성_후_입장() {
         // given
         String roomName = "room1";
         Long memberId = 1L;
@@ -171,7 +169,7 @@ public class ChatRoomServiceTest {
     }
 
     @Test
-    void chatRoom의_History를_RoomId_및_입장시간을_조건으로_조회() throws InterruptedException {
+    void chatHistory를_RoomId_및_입장시간을_조건으로_조회() throws InterruptedException {
         // given
         Long memberId = 12L;
         Long newMemberId = 13L;
@@ -181,7 +179,7 @@ public class ChatRoomServiceTest {
 
         for(int i=0; i<10; i++) {
             long seq = chatIdGenerateUtils.nextId();
-            ChatHistory write = chatHistoryService.write(
+            ChatHistory write = chatRoomService.writeChatHistory(
                     ChatDto.builder()
                             .seq(seq)
                             .roomId(chatRoom.getRoomId())
@@ -198,7 +196,7 @@ public class ChatRoomServiceTest {
         Thread.sleep(100);
         for(int i=0; i<100; i++) {
             long seq = chatIdGenerateUtils.nextId();
-            chatHistoryService.write(
+            chatRoomService.writeChatHistory(
                     ChatDto.builder()
                             .seq(seq)
                             .roomId(chatRoom.getRoomId())
@@ -215,5 +213,26 @@ public class ChatRoomServiceTest {
         for(Long seq : seqList) {
             chatHistoryRepository.deleteBySeq(seq);
         }
+    }
+
+    @Test
+    void chatroom에_동일한_member가_2번_이상_입장해도_최초_입장시간은_불변함() throws InterruptedException {
+        // given
+        Long memberId = 14L;
+        Long newMemberId = 15L;
+        String roomName = "room13";
+        ChatRoom chatRoom = chatRoomService.create(memberId, roomName);
+
+        // when
+        Thread.sleep(100);
+        MemberChatRoom enter1 = chatRoomService.enter(newMemberId, chatRoom.getRoomId());
+        Thread.sleep(1000);
+        MemberChatRoom enter2 = chatRoomService.enter(newMemberId, chatRoom.getRoomId());
+        Thread.sleep(1000);
+        MemberChatRoom enter3 = chatRoomService.enter(newMemberId, chatRoom.getRoomId());
+
+        // then
+        Assertions.assertEquals(enter1.getEnterDateTime().getSecond(), enter3.getEnterDateTime().getSecond());
+        Assertions.assertEquals(enter1.getEnterDateTime().getSecond(), enter2.getEnterDateTime().getSecond());
     }
 }

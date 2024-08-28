@@ -1,6 +1,5 @@
 package websocket.example.chatting_server.chat.medium.controller;
 
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import org.awaitility.Awaitility;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -22,7 +21,7 @@ import org.springframework.web.socket.messaging.WebSocketStompClient;
 import websocket.example.chatting_server.chat.config.RabbitMQMessageBrokerConfig;
 import websocket.example.chatting_server.chat.config.WebSocketConfig;
 import websocket.example.chatting_server.chat.controller.dto.ChatDto;
-import websocket.example.chatting_server.chat.infrastructure.ChatHistoryRepository;
+import websocket.example.chatting_server.chatRoom.infrastructure.ChatHistoryRepository;
 import websocket.example.chatting_server.chat.infrastructure.impl.InMemoryOutboundChannelHistoryRepository;
 import websocket.example.chatting_server.chat.infrastructure.impl.RedisLockRepositoryImpl;
 import websocket.example.chatting_server.chat.interceptor.SessionIdRegisterInterceptor;

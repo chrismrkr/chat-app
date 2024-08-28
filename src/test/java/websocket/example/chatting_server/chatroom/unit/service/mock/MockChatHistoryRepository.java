@@ -1,7 +1,7 @@
 package websocket.example.chatting_server.chatroom.unit.service.mock;
 
-import websocket.example.chatting_server.chat.domain.ChatHistory;
-import websocket.example.chatting_server.chat.infrastructure.ChatHistoryRepository;
+import websocket.example.chatting_server.chatRoom.domain.ChatHistory;
+import websocket.example.chatting_server.chatRoom.infrastructure.ChatHistoryRepository;
 
 import java.time.LocalDateTime;
 import java.util.List;

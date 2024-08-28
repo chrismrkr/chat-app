@@ -2,8 +2,7 @@ package websocket.example.chatting_server.chatroom.unit.service;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import websocket.example.chatting_server.chat.infrastructure.ChatHistoryRepository;
-import websocket.example.chatting_server.chat.service.ChatHistoryService;
+import websocket.example.chatting_server.chatRoom.infrastructure.ChatHistoryRepository;
 import websocket.example.chatting_server.chatRoom.domain.MemberChatRoom;
 import websocket.example.chatting_server.chatRoom.infrastructure.MemberChatRoomRepository;
 import websocket.example.chatting_server.chatRoom.service.ChatRoomService;

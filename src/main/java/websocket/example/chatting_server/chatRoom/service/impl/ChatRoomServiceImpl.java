@@ -3,9 +3,9 @@ package websocket.example.chatting_server.chatRoom.service.impl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import websocket.example.chatting_server.chat.domain.ChatHistory;
-import websocket.example.chatting_server.chat.infrastructure.ChatHistoryRepository;
-import websocket.example.chatting_server.chat.service.ChatHistoryService;
+import websocket.example.chatting_server.chat.controller.dto.ChatDto;
+import websocket.example.chatting_server.chatRoom.domain.ChatHistory;
+import websocket.example.chatting_server.chatRoom.infrastructure.ChatHistoryRepository;
 import websocket.example.chatting_server.chatRoom.domain.ChatRoom;
 import websocket.example.chatting_server.chatRoom.domain.MemberChatRoom;
 import websocket.example.chatting_server.chatRoom.infrastructure.ChatRoomRepository;
@@ -52,11 +52,15 @@ public class ChatRoomServiceImpl implements ChatRoomService {
 
     @Override
     public MemberChatRoom enter(Long memberId, Long roomId) {
-        ChatRoom chatRoom = chatRoomRepository.findById(roomId)
+        ChatRoom chatRoom = chatRoomRepository.findByIdWithParticipants(roomId)
                 .orElseThrow(() -> new IllegalArgumentException("[INVALID ROOM ID]: ROOM NOT FOUND BY " + roomId));
-        MemberChatRoom participate = chatRoom.participate(memberId);
-        memberChatRoomRepository.save(participate);
-        return participate;
+        Optional<MemberChatRoom> participant = chatRoom.findParticipants(memberId);
+        if(participant.isEmpty()) {
+            MemberChatRoom newParticipant = chatRoom.participate(memberId);
+            newParticipant = memberChatRoomRepository.save(newParticipant);
+            return newParticipant;
+        }
+        else return participant.get();
     }
 
     @Override
@@ -74,6 +78,15 @@ public class ChatRoomServiceImpl implements ChatRoomService {
         if(participants.isEmpty()) {
             chatRoomRepository.delete(chatRoom);
         }
+    }
+
+    @Override
+    public ChatHistory writeChatHistory(ChatDto chatDto) {
+        ChatRoom chatRoom = chatRoomRepository.findById(chatDto.getRoomId()).orElseThrow
+                (() -> new IllegalArgumentException("[INVALID ROOM ID]: ROOM NOT FOUND BY " + chatDto.getRoomId()));
+        ChatHistory chatHistory = chatRoom.createChatHistory(chatDto);
+        chatHistory = chatHistoryRepository.save(chatHistory);
+        return chatHistory;
     }
 
     @Override

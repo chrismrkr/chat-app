@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import websocket.example.chatting_server.chat.domain.ChatHistory;
+import websocket.example.chatting_server.chatRoom.domain.ChatHistory;
 import websocket.example.chatting_server.chatRoom.controller.dto.*;
 import websocket.example.chatting_server.chatRoom.domain.MemberChatRoom;
 import websocket.example.chatting_server.chatRoom.service.ChatRoomService;

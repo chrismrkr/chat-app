@@ -1,14 +1,12 @@
-package websocket.example.chatting_server.chat.infrastructure.impl;
+package websocket.example.chatting_server.chatRoom.infrastructure.impl;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.elasticsearch.client.elc.ElasticsearchTemplate;
 
 import org.springframework.stereotype.Repository;
-import websocket.example.chatting_server.chat.domain.ChatHistory;
-import websocket.example.chatting_server.chat.infrastructure.ChatHistoryEsRepository;
-import websocket.example.chatting_server.chat.infrastructure.ChatHistoryRepository;
-import websocket.example.chatting_server.chat.infrastructure.entity.ChatHistoryEntity;
-import websocket.example.chatting_server.chat.utils.ChatIdGenerateUtils;
+import websocket.example.chatting_server.chatRoom.domain.ChatHistory;
+import websocket.example.chatting_server.chatRoom.infrastructure.ChatHistoryEsRepository;
+import websocket.example.chatting_server.chatRoom.infrastructure.ChatHistoryRepository;
+import websocket.example.chatting_server.chatRoom.infrastructure.entity.ChatHistoryEntity;
 
 import java.time.LocalDateTime;
 import java.util.List;

@@ -1,11 +1,11 @@
-package websocket.example.chatting_server.chat.medium.infrastructure;
+package websocket.example.chatting_server.chatroom.medium.repository;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import websocket.example.chatting_server.chat.domain.ChatHistory;
-import websocket.example.chatting_server.chat.infrastructure.ChatHistoryRepository;
+import websocket.example.chatting_server.chatRoom.domain.ChatHistory;
+import websocket.example.chatting_server.chatRoom.infrastructure.ChatHistoryRepository;
 import websocket.example.chatting_server.chat.utils.ChatIdGenerateUtils;
 
 import java.time.LocalDateTime;
@@ -104,7 +104,7 @@ public class ChatHistoryRepositoryTest {
     }
 
     @Test
-    void chatHistory_roomId_및_특정시간_뒤에_생성된_것_조회() throws InterruptedException {
+    void chatHistory를_roomId_및_특정시간_뒤에_생성된_것_조회() throws InterruptedException {
         // given
         int chatHistoryNumber = 50;
         long roomId = 4L;

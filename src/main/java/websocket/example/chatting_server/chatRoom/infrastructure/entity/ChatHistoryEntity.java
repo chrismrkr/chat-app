@@ -1,4 +1,4 @@
-package websocket.example.chatting_server.chat.infrastructure.entity;
+package websocket.example.chatting_server.chatRoom.infrastructure.entity;
 
 import lombok.Builder;
 import lombok.Getter;

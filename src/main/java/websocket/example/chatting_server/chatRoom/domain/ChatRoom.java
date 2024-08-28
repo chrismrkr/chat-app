@@ -1,18 +1,19 @@
 package websocket.example.chatting_server.chatRoom.domain;
 
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import websocket.example.chatting_server.chat.controller.dto.ChatDto;
 import websocket.example.chatting_server.chatRoom.infrastructure.entity.ChatRoomEntity;
 import websocket.example.chatting_server.chatRoom.infrastructure.entity.MemberChatRoomEntity;
 
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class ChatRoom {
+    @EqualsAndHashCode.Include
     private Long roomId;
     private String roomName;
     private Set<MemberChatRoom> participants = new HashSet<>();
@@ -32,6 +33,17 @@ public class ChatRoom {
         return participant;
     }
 
+    public ChatHistory createChatHistory(ChatDto chatDto) {
+        ChatHistory newHistory = ChatHistory.builder()
+                .seq(chatDto.getSeq())
+                .roomId(chatDto.getRoomId())
+                .senderName(chatDto.getSenderName())
+                .message(chatDto.getMessage())
+                .sendTime(LocalDateTime.now())
+                .build();
+        return newHistory;
+    }
+
     public boolean exit(MemberChatRoom memberChatRoom) {
         return this.participants.remove(memberChatRoom);
     }
@@ -49,6 +61,13 @@ public class ChatRoom {
                 .build();
     }
     public static ChatRoom from(ChatRoomEntity chatRoomEntity) {
+        return ChatRoom.builder()
+                .roomId(chatRoomEntity.getRoomId())
+                .roomName(chatRoomEntity.getRoomName())
+                .build();
+    }
+
+    public static ChatRoom fromWithParticipants(ChatRoomEntity chatRoomEntity) {
         ChatRoom chatRoom = ChatRoom.builder()
                 .roomId(chatRoomEntity.getRoomId())
                 .roomName(chatRoomEntity.getRoomName())

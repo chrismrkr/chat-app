@@ -17,8 +17,8 @@ public class ChatRoomRepositoryImpl implements ChatRoomRepository {
 
     @Override
     public Optional<ChatRoom> findByIdWithParticipants(Long roomId) {
-        return chatRoomJpaRepository.findByIdWithChatRoom(roomId)
-                .map(ChatRoom::from);
+        return chatRoomJpaRepository.findByIdWithParticipants(roomId)
+                .map(ChatRoom::fromWithParticipants);
     }
 
     @Override
@@ -26,12 +26,14 @@ public class ChatRoomRepositoryImpl implements ChatRoomRepository {
         return chatRoomJpaRepository.findById(roomId)
                 .map(ChatRoom::from);
     }
+
     @Override
     public List<ChatRoom> findAll() {
         return chatRoomJpaRepository.findAll()
                 .stream().map(ChatRoom::from)
                 .toList();
     }
+
     @Override
     public ChatRoom create(String roomName) {
         ChatRoom newChatRoom = ChatRoom.builder()

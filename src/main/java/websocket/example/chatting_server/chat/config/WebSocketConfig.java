@@ -5,18 +5,17 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.env.Environment;
 import org.springframework.messaging.simp.config.ChannelRegistration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
-import org.springframework.util.AntPathMatcher;
 import org.springframework.web.socket.config.annotation.*;
 import org.springframework.beans.factory.annotation.Value;
-import websocket.example.chatting_server.chat.infrastructure.ChatHistoryRepository;
+import websocket.example.chatting_server.chatRoom.infrastructure.ChatHistoryRepository;
 import websocket.example.chatting_server.chat.infrastructure.LockRepository;
 import websocket.example.chatting_server.chat.infrastructure.OutboundChannelHistoryRepository;
 import websocket.example.chatting_server.chat.interceptor.DuplicatedMessageCheckInterceptor;
 import websocket.example.chatting_server.chat.interceptor.SessionIdRegisterInterceptor;
 import websocket.example.chatting_server.chat.utils.ChatIdGenerateUtils;
+import websocket.example.chatting_server.chatRoom.service.ChatRoomService;
 
 @Configuration
 @EnableWebSocketMessageBroker
@@ -26,7 +25,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     private final OutboundChannelHistoryRepository outboundChannelHistoryRepository;
     private final LockRepository lockRepository;
     private final ChatIdGenerateUtils chatIdGenerateUtils;
-    private final ChatHistoryRepository chatHistoryRepository;
+    private final ChatRoomService chatRoomService;
     @Value("${spring.rabbitmq.host}")
     private String rabbitmqHost;
     @Value("${spring.rabbitmq.relay-port}")
@@ -58,7 +57,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     }
     @Bean
     public DuplicatedMessageCheckInterceptor duplicatedMessageCheckInterceptor() {
-        return new DuplicatedMessageCheckInterceptor(objectMapper, outboundChannelHistoryRepository, lockRepository, chatHistoryRepository);
+        return new DuplicatedMessageCheckInterceptor(objectMapper, outboundChannelHistoryRepository, lockRepository, chatRoomService);
     }
 
     @Override

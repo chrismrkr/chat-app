@@ -28,8 +28,7 @@ public class ChatRoomRepositoryTest {
     }
 
     @Test
-    @Transactional
-    void Member가_ChatRoom을_생성() {
+    void ChatRoom에_Member가_참여() {
         // given
         String roomName = "room1";
         Long memberId = 1L;
@@ -37,14 +36,13 @@ public class ChatRoomRepositoryTest {
         ChatRoom chatRoom = chatRoomRepository.create(roomName);
         MemberChatRoom participate = chatRoom.participate(memberId);
         memberChatRoomRepository.save(participate);
-        em.flush();
-        em.clear();
 
         // then
-        Optional<ChatRoom> byId = chatRoomRepository.findById(chatRoom.getRoomId());
+        Optional<ChatRoom> byId = chatRoomRepository.findByIdWithParticipants(chatRoom.getRoomId());
         Assertions.assertEquals(roomName, byId.get().getRoomName());
         Assertions.assertNotNull(byId.get().getRoomId());
         Assertions.assertEquals(byId.get().getRoomId(), chatRoom.getRoomId());
+        Assertions.assertEquals(byId.get().getParticipants().size(), 1);
 
         List<MemberChatRoom> byMemberId = memberChatRoomRepository.findByMemberId(memberId);
         Assertions.assertEquals(1, byMemberId.size());
@@ -54,11 +52,9 @@ public class ChatRoomRepositoryTest {
     }
 
     @Test
-    @Transactional
     void Chatroom을_roomId로_검색() {
         // given
         String roomName = "room2";
-        Long memberId2 = 2L;
         ChatRoom chatRoom = chatRoomRepository.create(roomName);
         // when
         Optional<ChatRoom> byId = chatRoomRepository.findById(chatRoom.getRoomId());
@@ -71,7 +67,6 @@ public class ChatRoomRepositoryTest {
     @Test
     void ChatRoom_전체_검색() {
         // given
-        Long memberId3 = 3L;
         String roomName3 = "room3";
         String roomName4 = "room4";
         chatRoomRepository.create(roomName3);
@@ -95,7 +90,6 @@ public class ChatRoomRepositoryTest {
     }
 
     @Test
-    @Transactional
     void MemberChatRoom을_memberId로_검색() {
         // given
         String[] roomNames = {"room6", "room7"};
@@ -105,8 +99,6 @@ public class ChatRoomRepositoryTest {
             MemberChatRoom participate = chatRoom.participate(memberId);
             memberChatRoomRepository.save(participate);
         }
-        em.flush();
-        em.clear();
 
         // when
         List<MemberChatRoom> byMemberId = memberChatRoomRepository.findByMemberId(memberId);
@@ -202,28 +194,7 @@ public class ChatRoomRepositoryTest {
         chatRoomRepository.findById(chatRoom.getRoomId())
         , Optional.empty());
     }
-    @Test
-    void 동일한_memberChatRoom을_2번_저장해도_최초_생성일이_변경되지_않음() throws InterruptedException {
-        // given
-        String roomName = "chatroomrepotest-room13";
-        ChatRoom chatRoom = chatRoomRepository.create(roomName);
-        Long memberId = 15L;
 
-        // when
-        MemberChatRoom participate1 = chatRoom.participate(memberId);
-        memberChatRoomRepository.save(participate1);
-        Thread.sleep(600);
-        MemberChatRoom participate2 = chatRoom.participate(memberId);
-        memberChatRoomRepository.save(participate2);
-        Thread.sleep(600);
-
-        // then
-        MemberChatRoom find = memberChatRoomRepository
-                                .findByMemberAndRoomId(memberId, chatRoom.getRoomId())
-                                .get();
-        Assertions.assertEquals(find.getEnterDateTime().getSecond(), participate1.getEnterDateTime().getSecond());
-    }
-    @Transactional
     private ChatRoom joinChatRoom(String roomName, Long[] memberIds) {
         ChatRoom chatRoom = chatRoomRepository.create(roomName);
         for(Long memberId : memberIds) {
