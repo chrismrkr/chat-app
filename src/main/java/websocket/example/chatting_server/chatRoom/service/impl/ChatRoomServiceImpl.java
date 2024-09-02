@@ -51,16 +51,22 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     }
 
     @Override
+    @Transactional
     public MemberChatRoom enter(Long memberId, Long roomId) {
-        ChatRoom chatRoom = chatRoomRepository.findByIdWithParticipants(roomId)
+        ChatRoom chatRoom = chatRoomRepository.findById(roomId)
                 .orElseThrow(() -> new IllegalArgumentException("[INVALID ROOM ID]: ROOM NOT FOUND BY " + roomId));
-        Optional<MemberChatRoom> participant = chatRoom.findParticipants(memberId);
-        if(participant.isEmpty()) {
-            MemberChatRoom newParticipant = chatRoom.participate(memberId);
-            newParticipant = memberChatRoomRepository.save(newParticipant);
-            return newParticipant;
-        }
-        else return participant.get();
+        MemberChatRoom participate = chatRoom.participate(memberId);
+        participate = memberChatRoomRepository.save(participate);
+        return participate;
+//        ChatRoom chatRoom = chatRoomRepository.findByIdWithParticipants(roomId)
+//                .orElseThrow(() -> new IllegalArgumentException("[INVALID ROOM ID]: ROOM NOT FOUND BY " + roomId));
+//        Optional<MemberChatRoom> participant = chatRoom.findParticipants(memberId);
+//        if(participant.isEmpty()) {
+//            MemberChatRoom newParticipant = chatRoom.participate(memberId);
+//            newParticipant = memberChatRoomRepository.save(newParticipant);
+//            return newParticipant;
+//        }
+//        else return participant.get();
     }
 
     @Override
