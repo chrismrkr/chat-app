@@ -15,6 +15,7 @@ import websocket.example.chatting_server.chatRoom.infrastructure.ChatRoomReposit
 import websocket.example.chatting_server.chatRoom.infrastructure.MemberChatRoomRepository;
 import websocket.example.chatting_server.chatRoom.service.ChatRoomService;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -232,7 +233,8 @@ public class ChatRoomServiceTest {
         MemberChatRoom enter3 = chatRoomService.enter(newMemberId, chatRoom.getRoomId());
 
         // then
-        Assertions.assertEquals(enter1.getEnterDateTime().getSecond(), enter3.getEnterDateTime().getSecond());
-        Assertions.assertEquals(enter1.getEnterDateTime().getSecond(), enter2.getEnterDateTime().getSecond());
+        LocalDateTime localDateTime = memberChatRoomRepository.findEnterDateTime(newMemberId, chatRoom.getRoomId())
+                .get();
+        Assertions.assertEquals(enter1.getEnterDateTime().getSecond(), localDateTime.getSecond());
     }
 }
