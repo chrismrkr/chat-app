@@ -3,6 +3,8 @@ package websocket.example.chatting_server.chatroom.medium.repository;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,6 +19,7 @@ import java.util.Optional;
 
 @SpringBootTest
 public class ChatRoomRepositoryTest {
+    private static final Logger log = LoggerFactory.getLogger(ChatRoomRepositoryTest.class);
     private final ChatRoomRepository chatRoomRepository;
     private final MemberChatRoomRepository memberChatRoomRepository;
     EntityManager em;
@@ -195,6 +198,52 @@ public class ChatRoomRepositoryTest {
         , Optional.empty());
     }
 
+    @Test
+    void memberChatRoom을_pk로_삭제() {
+        // given
+        String roomName = "room13";
+        Long[] memberId = {15L, 16L};
+        ChatRoom chatRoom = joinChatRoom(roomName, memberId);
+
+        // when
+        memberChatRoomRepository.deleteById(memberId[0], chatRoom.getRoomId());
+
+        // then
+        List<MemberChatRoom> byRoomId = memberChatRoomRepository.findByRoomId(chatRoom.getRoomId());
+        Assertions.assertEquals(byRoomId.size(), 1);
+    }
+
+    @Test
+    void memberChatRoom이_존재하지_않으나_삭제해도_문제_없음() {
+        // given
+        String roomName = "room14";
+        Long[] memberId = {17L, 18L};
+        ChatRoom chatRoom = joinChatRoom(roomName, memberId);
+
+        // when
+        memberChatRoomRepository.deleteById(memberId[0], chatRoom.getRoomId());
+        memberChatRoomRepository.deleteById(memberId[0], chatRoom.getRoomId());
+
+        // then
+        List<MemberChatRoom> byRoomId = memberChatRoomRepository.findByRoomId(chatRoom.getRoomId());
+        Assertions.assertEquals(byRoomId.size(), 1);
+    }
+
+    @Test
+    void chatroom이_존재하지_않으나_삭제해도_문제없음() {
+        // given
+        String roomName = "room15";
+        ChatRoom chatRoom = chatRoomRepository.create(roomName);
+
+        // when
+        chatRoomRepository.delete(chatRoom);
+        chatRoomRepository.delete(chatRoom);
+
+        // then
+        Optional<ChatRoom> byId = chatRoomRepository.findById(chatRoom.getRoomId());
+        Assertions.assertEquals(byId, Optional.empty());
+    }
+
     private ChatRoom joinChatRoom(String roomName, Long[] memberIds) {
         ChatRoom chatRoom = chatRoomRepository.create(roomName);
         for(Long memberId : memberIds) {
@@ -203,4 +252,5 @@ public class ChatRoomRepositoryTest {
         }
         return chatRoom;
     }
+
 }

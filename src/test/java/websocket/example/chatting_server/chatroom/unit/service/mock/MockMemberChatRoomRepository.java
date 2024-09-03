@@ -25,6 +25,16 @@ public class MockMemberChatRoomRepository implements MemberChatRoomRepository {
     }
 
     @Override
+    public void deleteById(Long memberId, Long roomId) {
+        Optional<MemberChatRoom> any = datas.stream()
+                .filter(memberChatRoom -> memberChatRoom.getMemberId().equals(memberId) && memberChatRoom.getChatRoom().getRoomId().equals(roomId))
+                .findAny();
+        if(any.isPresent()) {
+            datas.remove(any.get());
+        }
+    }
+
+    @Override
     public Optional<MemberChatRoom> findByMemberAndRoomId(Long memberId, Long roomId) {
         Optional<MemberChatRoom> any = datas.stream()
                 .filter(memberChatRoom ->

@@ -30,6 +30,11 @@ public class MemberChatRoomRepositoryImpl implements MemberChatRoomRepository {
         memberChatRoomJpaRepository.delete(memberChatRoom.toEntity());
     }
 
+    @Override
+    public void deleteById(Long memberId, Long roomId) {
+        memberChatRoomJpaRepository.deleteById(new MemberChatRoomId(memberId, roomId));
+    }
+
 
     @Override
     public List<MemberChatRoom> findByMemberId(Long memberId) {
@@ -40,8 +45,9 @@ public class MemberChatRoomRepositoryImpl implements MemberChatRoomRepository {
     }
 
     @Override
+    @Transactional
     public List<MemberChatRoom> findByRoomId(Long roomId) {
-        List<MemberChatRoom> list = memberChatRoomJpaRepository.findByRoomIdWithChatRoom(roomId)
+        List<MemberChatRoom> list = memberChatRoomJpaRepository.findByRoomId(roomId)
                 .stream().map(MemberChatRoom::from)
                 .toList();
         return list;

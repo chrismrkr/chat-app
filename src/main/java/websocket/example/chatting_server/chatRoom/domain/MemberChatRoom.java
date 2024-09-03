@@ -8,9 +8,11 @@ import java.time.LocalDateTime;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
-@EqualsAndHashCode
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class MemberChatRoom {
+    @EqualsAndHashCode.Include
     private Long memberId;
+    @EqualsAndHashCode.Include
     private ChatRoom chatRoom;
     private LocalDateTime enterDateTime;
 

@@ -19,6 +19,9 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 @SpringBootTest
 @Rollback
@@ -236,5 +239,38 @@ public class ChatRoomServiceTest {
         LocalDateTime localDateTime = memberChatRoomRepository.findEnterDateTime(newMemberId, chatRoom.getRoomId())
                 .get();
         Assertions.assertEquals(enter1.getEnterDateTime().getSecond(), localDateTime.getSecond());
+    }
+
+    @Test
+    void chatroom에서_동시에_모두_퇴장해도_정상적으로_chatroom이_삭제됨() throws InterruptedException {
+        // given
+        String roomName = "room14";
+        Long memberId = 16L;
+        ChatRoom chatRoom = chatRoomService.create(memberId, roomName);
+        Long startMemberId = 17L;
+        Long endMemberId = 300L;
+        for(long i=startMemberId; i<=endMemberId; i++) {
+            chatRoomService.enter(i, chatRoom.getRoomId());
+        }
+
+        // when
+        chatRoomService.exit(memberId, chatRoom.getRoomId());
+        long threadCount = endMemberId - startMemberId + 1;
+        ExecutorService executorService = Executors.newFixedThreadPool((int) threadCount);
+        CountDownLatch countDownLatch = new CountDownLatch((int) threadCount);
+
+        for(long i=startMemberId; i<=endMemberId; i++) {
+            long finalI = i;
+            executorService.execute(() -> {
+                chatRoomService.exit(finalI, chatRoom.getRoomId());
+                countDownLatch.countDown();
+            });
+        }
+
+        countDownLatch.await();
+        List<MemberChatRoom> byRoomId = memberChatRoomRepository.findByRoomId(chatRoom.getRoomId());
+        Optional<ChatRoom> byId = chatRoomRepository.findById(chatRoom.getRoomId());
+        Assertions.assertEquals(byRoomId.size(), 0);
+        Assertions.assertEquals(byId, Optional.empty());
     }
 }

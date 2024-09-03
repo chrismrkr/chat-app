@@ -2,6 +2,7 @@ package websocket.example.chatting_server.chatRoom.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import websocket.example.chatting_server.chat.controller.dto.ChatDto;
 import websocket.example.chatting_server.chatRoom.domain.ChatHistory;
@@ -13,9 +14,11 @@ import websocket.example.chatting_server.chatRoom.infrastructure.MemberChatRoomR
 import websocket.example.chatting_server.chatRoom.service.ChatRoomService;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -63,16 +66,11 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     @Override
     @Transactional
     public void exit(Long memberId, Long roomId) {
-        ChatRoom chatRoom = chatRoomRepository.findByIdWithParticipants(roomId)
+        ChatRoom chatRoom = chatRoomRepository.findById(roomId)
                 .orElseThrow(() -> new IllegalArgumentException("[INVALID ROOM ID]: ROOM NOT FOUND BY " + roomId));
-
-        Optional<MemberChatRoom> participant = chatRoom.findParticipants(memberId);
-        if(participant.isPresent() && chatRoom.exit(participant.get())) {
-            memberChatRoomRepository.deleteMemberChatroomMapping(participant.get());
-        }
-
-        Set<MemberChatRoom> participants = chatRoom.getParticipants();
-        if(participants.isEmpty()) {
+        memberChatRoomRepository.deleteById(memberId, roomId);
+        List<MemberChatRoom> roomParticipants = memberChatRoomRepository.findByRoomId(roomId);
+        if(roomParticipants.isEmpty()) {
             chatRoomRepository.delete(chatRoom);
         }
     }

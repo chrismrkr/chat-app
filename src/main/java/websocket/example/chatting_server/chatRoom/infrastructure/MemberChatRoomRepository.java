@@ -10,6 +10,7 @@ import java.util.Optional;
 public interface MemberChatRoomRepository {
     MemberChatRoom save(MemberChatRoom memberChatRoom);
     void deleteMemberChatroomMapping(MemberChatRoom memberChatRoom);
+    void deleteById(Long memberId, Long roomId);
     List<MemberChatRoom> findByMemberId(Long memberId);
     List<MemberChatRoom> findByRoomId(Long roomId);
     Optional<MemberChatRoom> findByMemberAndRoomId(Long memberId, Long roomId);
