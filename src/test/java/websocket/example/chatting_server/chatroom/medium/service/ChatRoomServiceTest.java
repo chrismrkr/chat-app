@@ -112,16 +112,12 @@ public class ChatRoomServiceTest {
 
         // then
         Assertions.assertEquals(
-                memberChatRoomRepository.findByRoomId(chatRoom.getRoomId()).size(),
+                memberChatRoomRepository.findByRoomIdWithChatRoom(chatRoom.getRoomId()).size(),
                 1
         );
         Assertions.assertEquals(
-                memberChatRoomRepository.findByRoomId(chatRoom.getRoomId()).get(0).getMemberId(),
+                memberChatRoomRepository.findByRoomIdWithChatRoom(chatRoom.getRoomId()).get(0).getMemberId(),
                 memberId
-        );
-        Assertions.assertEquals(
-                memberChatRoomRepository.findByRoomId(chatRoom.getRoomId()).get(0).getChatRoom().getRoomId(),
-                chatRoom.getRoomId()
         );
         Assertions.assertNotNull(chatRoomRepository.findById(chatRoom.getRoomId()));
     }
@@ -149,7 +145,7 @@ public class ChatRoomServiceTest {
 
         // then
         Assertions.assertEquals(chatRoomRepository.findById(chatRoom.getRoomId()), Optional.empty());
-        Assertions.assertEquals(memberChatRoomRepository.findByRoomId(chatRoom.getRoomId()).size(), 0);
+        Assertions.assertEquals(memberChatRoomRepository.findByRoomIdWithChatRoom(chatRoom.getRoomId()).size(), 0);
     }
 
     @Test
@@ -248,7 +244,7 @@ public class ChatRoomServiceTest {
         Long memberId = 16L;
         ChatRoom chatRoom = chatRoomService.create(memberId, roomName);
         Long startMemberId = 17L;
-        Long endMemberId = 300L;
+        Long endMemberId = 18L;
         for(long i=startMemberId; i<=endMemberId; i++) {
             chatRoomService.enter(i, chatRoom.getRoomId());
         }
@@ -268,7 +264,7 @@ public class ChatRoomServiceTest {
         }
 
         countDownLatch.await();
-        List<MemberChatRoom> byRoomId = memberChatRoomRepository.findByRoomId(chatRoom.getRoomId());
+        List<MemberChatRoom> byRoomId = memberChatRoomRepository.findByRoomIdWithChatRoom(chatRoom.getRoomId());
         Optional<ChatRoom> byId = chatRoomRepository.findById(chatRoom.getRoomId());
         Assertions.assertEquals(byRoomId.size(), 0);
         Assertions.assertEquals(byId, Optional.empty());

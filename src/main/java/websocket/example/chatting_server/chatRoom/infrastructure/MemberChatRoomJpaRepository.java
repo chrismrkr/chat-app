@@ -1,6 +1,8 @@
 package websocket.example.chatting_server.chatRoom.infrastructure;
 
+import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import websocket.example.chatting_server.chatRoom.infrastructure.entity.MemberChatRoomEntity;
@@ -20,6 +22,7 @@ public interface MemberChatRoomJpaRepository extends JpaRepository<MemberChatRoo
                     "FROM MemberChatRoomEntity mcr " +
                     "WHERE mcr.chatRoomEntity.roomId = :roomId"
             )
+    @Lock(LockModeType.PESSIMISTIC_READ)
     List<MemberChatRoomEntity> findByRoomId(@Param("roomId") Long roomId);
     @Query(value = "SELECT mcr " +
                     "FROM MemberChatRoomEntity mcr " +

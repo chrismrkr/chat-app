@@ -12,6 +12,7 @@ public interface MemberChatRoomRepository {
     void deleteMemberChatroomMapping(MemberChatRoom memberChatRoom);
     void deleteById(Long memberId, Long roomId);
     List<MemberChatRoom> findByMemberId(Long memberId);
+    List<MemberChatRoom> findByRoomIdWithChatRoom(Long roomId);
     List<MemberChatRoom> findByRoomId(Long roomId);
     Optional<MemberChatRoom> findByMemberAndRoomId(Long memberId, Long roomId);
     Optional<LocalDateTime> findEnterDateTime(Long memberId, Long roomId);

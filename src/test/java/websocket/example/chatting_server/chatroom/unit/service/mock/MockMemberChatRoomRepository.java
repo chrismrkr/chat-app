@@ -60,6 +60,13 @@ public class MockMemberChatRoomRepository implements MemberChatRoomRepository {
     }
 
     @Override
+    public List<MemberChatRoom> findByRoomIdWithChatRoom(Long roomId) {
+        List<MemberChatRoom> list = datas.stream().filter(memberChatRoom -> memberChatRoom.getChatRoom().getRoomId() == roomId)
+                .toList();
+        return list;
+    }
+
+    @Override
     public List<MemberChatRoom> findByRoomId(Long roomId) {
         List<MemberChatRoom> list = datas.stream().filter(memberChatRoom -> memberChatRoom.getChatRoom().getRoomId() == roomId)
                 .toList();

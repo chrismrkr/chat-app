@@ -1,6 +1,8 @@
 package websocket.example.chatting_server.chatRoom.infrastructure.impl;
 
+import jakarta.persistence.LockModeType;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import websocket.example.chatting_server.chatRoom.domain.ChatRoom;
@@ -45,10 +47,17 @@ public class MemberChatRoomRepositoryImpl implements MemberChatRoomRepository {
     }
 
     @Override
-    @Transactional
+    public List<MemberChatRoom> findByRoomIdWithChatRoom(Long roomId) {
+        List<MemberChatRoom> list = memberChatRoomJpaRepository.findByRoomIdWithChatRoom(roomId)
+                .stream().map(MemberChatRoom::from)
+                .toList();
+        return list;
+    }
+
+    @Override
     public List<MemberChatRoom> findByRoomId(Long roomId) {
         List<MemberChatRoom> list = memberChatRoomJpaRepository.findByRoomId(roomId)
-                .stream().map(MemberChatRoom::from)
+                .stream().map(MemberChatRoom::fromWithoutChatRoom)
                 .toList();
         return list;
     }

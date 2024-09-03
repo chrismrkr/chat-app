@@ -37,4 +37,10 @@ public class MemberChatRoom {
                 .build();
     }
 
+    public static MemberChatRoom fromWithoutChatRoom(MemberChatRoomEntity entity) {
+        return MemberChatRoom.builder()
+                .memberId(entity.getMemberId())
+                .enterDateTime(entity.getEnterDateTime())
+                .build();
+    }
 }

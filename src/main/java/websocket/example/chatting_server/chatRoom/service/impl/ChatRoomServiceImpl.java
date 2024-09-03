@@ -58,21 +58,29 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     public MemberChatRoom enter(Long memberId, Long roomId) {
         ChatRoom chatRoom = chatRoomRepository.findById(roomId)
                 .orElseThrow(() -> new IllegalArgumentException("[INVALID ROOM ID]: ROOM NOT FOUND BY " + roomId));
+        /**
+         * TODO. roomId로 MemberChatRoom를 조회한 결과가 없으면, ChatRoom이 사라진 것으로 Exception 발생시키는 코드 작성
+         */
         MemberChatRoom participate = chatRoom.participate(memberId);
         participate = memberChatRoomRepository.save(participate);
         return participate;
     }
 
     @Override
-    @Transactional
     public void exit(Long memberId, Long roomId) {
         ChatRoom chatRoom = chatRoomRepository.findById(roomId)
-                .orElseThrow(() -> new IllegalArgumentException("[INVALID ROOM ID]: ROOM NOT FOUND BY " + roomId));
+                .orElseThrow(
+                        () -> new IllegalArgumentException("[INVALID ROOM ID]: ROOM NOT FOUND BY " + roomId)
+                );
         memberChatRoomRepository.deleteById(memberId, roomId);
-        List<MemberChatRoom> roomParticipants = memberChatRoomRepository.findByRoomId(roomId);
-        if(roomParticipants.isEmpty()) {
-            chatRoomRepository.delete(chatRoom);
-        }
+        /**
+         * TODO. ChatRoom 인원 체크 및 빈방 삭제 이벤트를 비동기로 처리하도록 할 것
+         *      비동기 이벤트가 100% 실행되기 위한 메커니즘 확보할 것(kafka, transaction 등)
+         */
+//        List<MemberChatRoom> roomParticipants = memberChatRoomRepository.findByRoomId(roomId);
+//        if(roomParticipants.isEmpty()) {
+//            chatRoomRepository.delete(chatRoom);
+//        }
     }
 
     @Override
