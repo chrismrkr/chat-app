@@ -22,7 +22,6 @@ public interface MemberChatRoomJpaRepository extends JpaRepository<MemberChatRoo
                     "FROM MemberChatRoomEntity mcr " +
                     "WHERE mcr.chatRoomEntity.roomId = :roomId"
             )
-    @Lock(LockModeType.PESSIMISTIC_READ)
     List<MemberChatRoomEntity> findByRoomId(@Param("roomId") Long roomId);
     @Query(value = "SELECT mcr " +
                     "FROM MemberChatRoomEntity mcr " +

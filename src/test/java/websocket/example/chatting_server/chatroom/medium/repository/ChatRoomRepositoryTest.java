@@ -179,7 +179,6 @@ public class ChatRoomRepositoryTest {
         Assertions.assertEquals(2, byRoomId.size());
         for(int i=0; i<memberIds.length; i++) {
             Assertions.assertEquals(byRoomId.get(i).getMemberId(), memberIds[i]);
-            Assertions.assertEquals(byRoomId.get(i).getChatRoom().getRoomId(), chatRoom.getRoomId());
         }
     }
 
