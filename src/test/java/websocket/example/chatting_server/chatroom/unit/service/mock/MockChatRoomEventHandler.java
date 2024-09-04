@@ -1,5 +1,7 @@
 package websocket.example.chatting_server.chatroom.unit.service.mock;
 
+import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.springframework.kafka.support.Acknowledgment;
 import websocket.example.chatting_server.chatRoom.infrastructure.ChatRoomEventHandler;
 
 public class MockChatRoomEventHandler implements ChatRoomEventHandler {
@@ -10,7 +12,7 @@ public class MockChatRoomEventHandler implements ChatRoomEventHandler {
     }
 
     @Override
-    public void subscribeEmptyCheck(Long roomId) {
+    public void subscribeEmptyCheck(ConsumerRecord<Long, Long> record, Acknowledgment acknowledgment) {
 
     }
 }
