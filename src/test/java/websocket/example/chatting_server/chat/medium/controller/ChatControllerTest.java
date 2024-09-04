@@ -18,7 +18,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.socket.client.standard.StandardWebSocketClient;
 import org.springframework.web.socket.messaging.WebSocketStompClient;
-import websocket.example.chatting_server.chat.config.RabbitMQMessageBrokerConfig;
+import websocket.example.chatting_server.chat.config.RabbitMQConfig;
 import websocket.example.chatting_server.chat.config.WebSocketConfig;
 import websocket.example.chatting_server.chat.controller.dto.ChatDto;
 import websocket.example.chatting_server.chatRoom.infrastructure.ChatHistoryRepository;
@@ -40,7 +40,7 @@ public class ChatControllerTest {
     @Autowired
     WebSocketConfig webSocketConfig;
     @Autowired
-    RabbitMQMessageBrokerConfig rabbitMQMessageBrokerConfig;
+    RabbitMQConfig rabbitMQConfig;
     @Autowired
     InMemoryOutboundChannelHistoryRepository outboundChannelHistoryRepository;
     @Autowired

@@ -4,12 +4,14 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import websocket.example.chatting_server.chatRoom.infrastructure.ChatHistoryRepository;
 import websocket.example.chatting_server.chatRoom.domain.MemberChatRoom;
+import websocket.example.chatting_server.chatRoom.infrastructure.ChatRoomEventHandler;
 import websocket.example.chatting_server.chatRoom.infrastructure.MemberChatRoomRepository;
 import websocket.example.chatting_server.chatRoom.service.ChatRoomService;
 import websocket.example.chatting_server.chatRoom.domain.ChatRoom;
 import websocket.example.chatting_server.chatRoom.service.impl.ChatRoomServiceImpl;
 import websocket.example.chatting_server.chatRoom.infrastructure.ChatRoomRepository;
 import websocket.example.chatting_server.chatroom.unit.service.mock.MockChatHistoryRepository;
+import websocket.example.chatting_server.chatroom.unit.service.mock.MockChatRoomEventHandler;
 import websocket.example.chatting_server.chatroom.unit.service.mock.MockChatRoomRepository;
 import websocket.example.chatting_server.chatroom.unit.service.mock.MockMemberChatRoomRepository;
 
@@ -20,7 +22,8 @@ public class ChatRoomServiceTest {
     ChatRoomRepository chatRoomRepository = new MockChatRoomRepository();
     MemberChatRoomRepository memberChatRoomRepository = new MockMemberChatRoomRepository();
     ChatHistoryRepository chatHistoryRepository = new MockChatHistoryRepository();
-    ChatRoomService chatRoomService = new ChatRoomServiceImpl(chatRoomRepository, memberChatRoomRepository, chatHistoryRepository);
+    ChatRoomEventHandler chatRoomEventHandler = new MockChatRoomEventHandler();
+    ChatRoomService chatRoomService = new ChatRoomServiceImpl(chatRoomRepository, memberChatRoomRepository, chatHistoryRepository, chatRoomEventHandler);
     @Test
     void chatRoom_생성() {
         // given

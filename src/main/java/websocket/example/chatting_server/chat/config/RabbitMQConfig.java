@@ -1,6 +1,5 @@
 package websocket.example.chatting_server.chat.config;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.core.*;
 import org.springframework.amqp.rabbit.annotation.EnableRabbit;
@@ -12,12 +11,11 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.env.Environment;
 
 @Configuration
 @EnableRabbit
 @Slf4j
-public class RabbitMQMessageBrokerConfig {
+public class RabbitMQConfig {
     @Value("${spring.rabbitmq.chat.queue-name}")
     private String CHAT_QUEUE_NAME;
     @Value("${spring.rabbitmq.chat.exchange-name}")

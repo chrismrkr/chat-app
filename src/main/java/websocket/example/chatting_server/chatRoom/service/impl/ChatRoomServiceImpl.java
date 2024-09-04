@@ -9,6 +9,7 @@ import websocket.example.chatting_server.chatRoom.domain.ChatHistory;
 import websocket.example.chatting_server.chatRoom.infrastructure.ChatHistoryRepository;
 import websocket.example.chatting_server.chatRoom.domain.ChatRoom;
 import websocket.example.chatting_server.chatRoom.domain.MemberChatRoom;
+import websocket.example.chatting_server.chatRoom.infrastructure.ChatRoomEventHandler;
 import websocket.example.chatting_server.chatRoom.infrastructure.ChatRoomRepository;
 import websocket.example.chatting_server.chatRoom.infrastructure.MemberChatRoomRepository;
 import websocket.example.chatting_server.chatRoom.service.ChatRoomService;
@@ -26,6 +27,7 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     private final ChatRoomRepository chatRoomRepository;
     private final MemberChatRoomRepository memberChatRoomRepository;
     private final ChatHistoryRepository chatHistoryRepository;
+    private final ChatRoomEventHandler chatRoomEventHandler;
     @Override
     public void delete(Long roomId) {
         ChatRoom chatRoom = chatRoomRepository.findById(roomId).orElseThrow
@@ -67,6 +69,7 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     }
 
     @Override
+    @Transactional
     public void exit(Long memberId, Long roomId) {
         ChatRoom chatRoom = chatRoomRepository.findById(roomId)
                 .orElseThrow(
@@ -77,7 +80,7 @@ public class ChatRoomServiceImpl implements ChatRoomService {
          * TODO. ChatRoom 인원 체크 및 빈방 삭제 이벤트를 비동기로 처리하도록 할 것
          *      비동기 이벤트가 100% 실행되기 위한 메커니즘 확보할 것(kafka, transaction 등)
          */
-
+        chatRoomEventHandler.publishEmptyCheck(roomId);
     }
 
     @Override
