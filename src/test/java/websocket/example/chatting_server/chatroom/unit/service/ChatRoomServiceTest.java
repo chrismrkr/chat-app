@@ -22,7 +22,7 @@ public class ChatRoomServiceTest {
     ChatRoomRepository chatRoomRepository = new MockChatRoomRepository();
     MemberChatRoomRepository memberChatRoomRepository = new MockMemberChatRoomRepository();
     ChatHistoryRepository chatHistoryRepository = new MockChatHistoryRepository();
-    ChatRoomEventHandler chatRoomEventHandler = new MockChatRoomEventHandler();
+    ChatRoomEventHandler chatRoomEventHandler = new MockChatRoomEventHandler(chatRoomRepository, memberChatRoomRepository);
     ChatRoomService chatRoomService = new ChatRoomServiceImpl(chatRoomRepository, memberChatRoomRepository, chatHistoryRepository, chatRoomEventHandler);
     @Test
     void chatRoom_생성() {

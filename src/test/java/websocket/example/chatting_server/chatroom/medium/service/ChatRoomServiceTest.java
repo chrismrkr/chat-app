@@ -1,5 +1,6 @@
 package websocket.example.chatting_server.chatroom.medium.service;
 
+import org.awaitility.Awaitility;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +23,7 @@ import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 @SpringBootTest
 @Rollback
@@ -144,8 +146,13 @@ public class ChatRoomServiceTest {
         chatRoomService.exit(newMemberId, chatRoom.getRoomId());
 
         // then
-        Assertions.assertEquals(chatRoomRepository.findById(chatRoom.getRoomId()), Optional.empty());
         Assertions.assertEquals(memberChatRoomRepository.findByRoomIdWithChatRoom(chatRoom.getRoomId()).size(), 0);
+        Awaitility.await()
+                .atMost(10, TimeUnit.SECONDS)
+                .untilAsserted(() -> {
+                    Optional<ChatRoom> byId = chatRoomRepository.findById(chatRoom.getRoomId());
+                    Assertions.assertEquals(byId, Optional.empty());
+                });
     }
 
     @Test
@@ -244,7 +251,7 @@ public class ChatRoomServiceTest {
         Long memberId = 16L;
         ChatRoom chatRoom = chatRoomService.create(memberId, roomName);
         Long startMemberId = 17L;
-        Long endMemberId = 18L;
+        Long endMemberId = 99L;
         for(long i=startMemberId; i<=endMemberId; i++) {
             chatRoomService.enter(i, chatRoom.getRoomId());
         }
@@ -265,8 +272,12 @@ public class ChatRoomServiceTest {
 
         countDownLatch.await();
         List<MemberChatRoom> byRoomId = memberChatRoomRepository.findByRoomIdWithChatRoom(chatRoom.getRoomId());
-        Optional<ChatRoom> byId = chatRoomRepository.findById(chatRoom.getRoomId());
         Assertions.assertEquals(byRoomId.size(), 0);
-        Assertions.assertEquals(byId, Optional.empty());
+        Awaitility.await()
+                .atMost(10, TimeUnit.SECONDS)
+                .untilAsserted(() -> {
+                    Optional<ChatRoom> byId = chatRoomRepository.findById(chatRoom.getRoomId());
+                    Assertions.assertEquals(byId, Optional.empty());
+                });
     }
 }

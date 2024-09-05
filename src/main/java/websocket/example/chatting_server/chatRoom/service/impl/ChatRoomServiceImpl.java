@@ -76,10 +76,6 @@ public class ChatRoomServiceImpl implements ChatRoomService {
                         () -> new IllegalArgumentException("[INVALID ROOM ID]: ROOM NOT FOUND BY " + roomId)
                 );
         memberChatRoomRepository.deleteById(memberId, roomId);
-        /**
-         * TODO. ChatRoom 인원 체크 및 빈방 삭제 이벤트를 비동기로 처리하도록 할 것
-         *      비동기 이벤트가 100% 실행되기 위한 메커니즘 확보할 것(kafka, transaction 등)
-         */
         chatRoomEventHandler.publishEmptyCheck(roomId);
     }
 
