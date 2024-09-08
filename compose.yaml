@@ -30,12 +30,14 @@ services:
       SPRING_DATA_REDIS_PORT: 6379
       SPRING_DATA_REDIS_DURATION-MILLIS: 10000
       SPRING_ELASTICSEARCH_URIS: http://chat-app-es:9200
+      SPRING_KAFKA_BOOTSTRAP-SERVERS: chat-app-kafka:9092
 
     depends_on:
       - chat-app-db
       - chat-app-rabbitmq
       - chat-app-redis
       - chat-app-es
+      - chat-app-kafka
     restart: always
 
   chat-app-backend2:
@@ -57,11 +59,13 @@ services:
       SPRING_DATA_REDIS_PORT: 6379
       SPRING_DATA_REDIS_DURATION-MILLIS: 10000
       SPRING_ELASTICSEARCH_URIS: http://chat-app-es:9200
+      SPRING_KAFKA_BOOTSTRAP-SERVERS: chat-app-kafka:9092
     depends_on:
       - chat-app-db
       - chat-app-rabbitmq
       - chat-app-redis
       - chat-app-es
+      - chat-app-kafka
     restart: always
 
   chat-app-rabbitmq:
@@ -115,6 +119,7 @@ services:
     container_name: chat-app-zookeeper
     ports:
      - "2181:2181"
+
   chat-app-kafka:
     image: wurstmeister/kafka:latest
     container_name: chat-app-kafka
