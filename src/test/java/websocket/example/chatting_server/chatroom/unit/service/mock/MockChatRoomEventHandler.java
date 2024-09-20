@@ -6,6 +6,7 @@ import websocket.example.chatting_server.chatRoom.domain.MemberChatRoom;
 import websocket.example.chatting_server.chatRoom.infrastructure.ChatRoomEventHandler;
 import websocket.example.chatting_server.chatRoom.infrastructure.ChatRoomRepository;
 import websocket.example.chatting_server.chatRoom.infrastructure.MemberChatRoomRepository;
+import websocket.example.chatting_server.chatRoom.service.event.ChatRoomExitEvent;
 
 import java.util.List;
 
@@ -18,7 +19,8 @@ public class MockChatRoomEventHandler implements ChatRoomEventHandler {
         this.memberChatRoomRepository = memberChatRoomRepository;
     }
     @Override
-    public void publishEmptyCheck(Long roomId) {
+    public void publishEmptyCheck(ChatRoomExitEvent chatRoomExitEvent) {
+        Long roomId = chatRoomExitEvent.getRoomId();
         List<MemberChatRoom> byRoomId = memberChatRoomRepository.findByRoomId(roomId);
         if(byRoomId.isEmpty()) {
             chatRoomRepository.delete(roomId);

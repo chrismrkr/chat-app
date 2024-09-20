@@ -2,12 +2,14 @@ package websocket.example.chatting_server.chatroom.unit.service;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.springframework.context.ApplicationEventPublisher;
 import websocket.example.chatting_server.chatRoom.infrastructure.ChatHistoryRepository;
 import websocket.example.chatting_server.chatRoom.domain.MemberChatRoom;
 import websocket.example.chatting_server.chatRoom.infrastructure.ChatRoomEventHandler;
 import websocket.example.chatting_server.chatRoom.infrastructure.MemberChatRoomRepository;
 import websocket.example.chatting_server.chatRoom.service.ChatRoomService;
 import websocket.example.chatting_server.chatRoom.domain.ChatRoom;
+import websocket.example.chatting_server.chatRoom.service.event.ChatRoomExitEvent;
 import websocket.example.chatting_server.chatRoom.service.impl.ChatRoomServiceImpl;
 import websocket.example.chatting_server.chatRoom.infrastructure.ChatRoomRepository;
 import websocket.example.chatting_server.chatroom.unit.service.mock.MockChatHistoryRepository;
@@ -22,8 +24,23 @@ public class ChatRoomServiceTest {
     ChatRoomRepository chatRoomRepository = new MockChatRoomRepository();
     MemberChatRoomRepository memberChatRoomRepository = new MockMemberChatRoomRepository();
     ChatHistoryRepository chatHistoryRepository = new MockChatHistoryRepository();
-    ChatRoomEventHandler chatRoomEventHandler = new MockChatRoomEventHandler(chatRoomRepository, memberChatRoomRepository);
-    ChatRoomService chatRoomService = new ChatRoomServiceImpl(chatRoomRepository, memberChatRoomRepository, chatHistoryRepository, chatRoomEventHandler);
+//    ChatRoomEventHandler chatRoomEventHandler = new MockChatRoomEventHandler(chatRoomRepository, memberChatRoomRepository);
+    ApplicationEventPublisher eventPublisher = new ApplicationEventPublisher() {
+    @Override
+    public void publishEvent(Object event) {
+        ChatRoomExitEvent exitEvent = (ChatRoomExitEvent) event;
+        Long roomId = exitEvent.getRoomId();
+        List<MemberChatRoom> byRoomId = memberChatRoomRepository.findByRoomId(roomId);
+        if(byRoomId.isEmpty()) {
+            chatRoomRepository.delete(roomId);
+        }
+    }
+    };
+    ChatRoomService chatRoomService = new ChatRoomServiceImpl(chatRoomRepository,
+            memberChatRoomRepository,
+            chatHistoryRepository,
+            eventPublisher
+            );
     @Test
     void chatRoom_생성() {
         // given

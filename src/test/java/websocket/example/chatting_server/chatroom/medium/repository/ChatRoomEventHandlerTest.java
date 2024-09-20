@@ -9,6 +9,7 @@ import websocket.example.chatting_server.chatRoom.domain.ChatRoom;
 import websocket.example.chatting_server.chatRoom.infrastructure.ChatRoomEventHandler;
 import websocket.example.chatting_server.chatRoom.infrastructure.ChatRoomRepository;
 import websocket.example.chatting_server.chatRoom.infrastructure.MemberChatRoomRepository;
+import websocket.example.chatting_server.chatRoom.service.event.ChatRoomExitEvent;
 
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
@@ -30,7 +31,7 @@ public class ChatRoomEventHandlerTest {
         ChatRoom chatRoom = chatRoomRepository.create(roomName);
 
         // when
-        chatRoomEventHandler.publishEmptyCheck(chatRoom.getRoomId());
+        chatRoomEventHandler.publishEmptyCheck(new ChatRoomExitEvent(chatRoom.getRoomId()));
         // then
         Awaitility.await()
                 .atMost(10, TimeUnit.SECONDS)
