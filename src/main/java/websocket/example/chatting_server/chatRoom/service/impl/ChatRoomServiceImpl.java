@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import websocket.example.chatting_server.chat.controller.dto.ChatDto;
+import websocket.example.chatting_server.chatRoom.aop.annotation.ChatRoomHistoryLock;
 import websocket.example.chatting_server.chatRoom.domain.ChatHistory;
 import websocket.example.chatting_server.chatRoom.infrastructure.ChatHistoryRepository;
 import websocket.example.chatting_server.chatRoom.domain.ChatRoom;
@@ -83,15 +84,18 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     }
 
     @Override
+    @ChatRoomHistoryLock
     public ChatHistory writeChatHistory(ChatDto chatDto) {
         ChatRoom chatRoom = chatRoomRepository.findById(chatDto.getRoomId()).orElseThrow
                 (() -> new IllegalArgumentException("[INVALID ROOM ID]: ROOM NOT FOUND BY " + chatDto.getRoomId()));
         ChatHistory chatHistory = chatRoom.createChatHistory(chatDto);
+        // TODO. Redis에 ChatHistory 저장 추가할 것
         chatHistory = chatHistoryRepository.save(chatHistory);
         return chatHistory;
     }
 
     @Override
+    @ChatRoomHistoryLock
     public List<ChatHistory> readChatHistory(Long memberId, Long roomId) {
         LocalDateTime enterDateTime = memberChatRoomRepository.findEnterDateTime(memberId, roomId)
                 .orElseThrow(() -> new IllegalArgumentException("[INVALID MEMBER OR ROOM ID] NOT FOUND"));
