@@ -59,9 +59,10 @@ public class DuplicatedMessageCheckInterceptor implements ChannelInterceptor {
         }
 
         try {
-            ChatHistory chatHistory = chatRoomService.writeChatHistory(chatDto);
+            ChatHistory chatHistory = chatRoomService.writeChatHistory(chatDto.getRoomId(), chatDto);
         } catch (Exception e) {
             // TODO. 실패 시 Rollback 필요
+            throw e;
         }
         return message;
     }
@@ -86,7 +87,10 @@ public class DuplicatedMessageCheckInterceptor implements ChannelInterceptor {
             long nextSeq = chatDto.getSeq();
             outboundChannelHistoryRepository.updateSequence(receiverSessionId, senderSessionId, nextSeq);
         }
-        lockRepository.releaseLock(senderSessionId + "-" + receiverSessionId + "#" + chatDto.getSeq().toString());
+        lockRepository.releaseLock(
+                senderSessionId + "-" + receiverSessionId + "#" + chatDto.getSeq().toString(),
+                Long.toString(chatDto.getSeq())
+                );
     }
 
     private boolean isReliableSequence(String receiverSessionId, String senderSessionId, long newSeq) {

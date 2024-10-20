@@ -30,10 +30,12 @@ public class RedisLockRepositoryImpl implements LockRepository {
     }
 
     @Override
-    public void releaseLock(String key) {
+    public void releaseLock(String key, String value) {
         ValueOperations valueOperations = redisTemplate.opsForValue();
-        valueOperations.getAndDelete(key);
-        return;
+        String val = (String) valueOperations.get(key);
+        if(!val.isEmpty() && val.equals(value)) {
+            valueOperations.getAndDelete(key);
+        }
     }
 
     @Override

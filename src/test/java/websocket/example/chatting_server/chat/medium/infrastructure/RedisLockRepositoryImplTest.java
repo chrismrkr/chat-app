@@ -22,7 +22,7 @@ public class RedisLockRepositoryImplTest {
         boolean b = repository.holdLock(key, value);
         // then
         Assertions.assertEquals(b, true);
-        repository.releaseLock(key);
+        repository.releaseLock(key, value);
     }
 
     @Test
@@ -37,7 +37,7 @@ public class RedisLockRepositoryImplTest {
         // then
         Assertions.assertEquals(ret1, true);
         Assertions.assertEquals(ret2, false);
-        repository.releaseLock(key);
+        repository.releaseLock(key, val1);
     }
 
     @Test
@@ -47,7 +47,7 @@ public class RedisLockRepositoryImplTest {
         String val = "val1";
         repository.holdLock(key, val);
         // when
-        repository.releaseLock(key);
+        repository.releaseLock(key, val);
         // then
         Assertions.assertEquals(repository.isLocked(key), false);
     }

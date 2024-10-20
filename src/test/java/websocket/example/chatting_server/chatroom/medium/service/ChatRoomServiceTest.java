@@ -188,6 +188,7 @@ public class ChatRoomServiceTest {
         for(int i=0; i<10; i++) {
             long seq = chatIdGenerateUtils.nextId();
             ChatHistory write = chatRoomService.writeChatHistory(
+                    chatRoom.getRoomId(),
                     ChatDto.builder()
                             .seq(seq)
                             .roomId(chatRoom.getRoomId())
@@ -205,6 +206,7 @@ public class ChatRoomServiceTest {
         for(int i=0; i<100; i++) {
             long seq = chatIdGenerateUtils.nextId();
             chatRoomService.writeChatHistory(
+                    chatRoom.getRoomId(),
                     ChatDto.builder()
                             .seq(seq)
                             .roomId(chatRoom.getRoomId())
@@ -216,7 +218,7 @@ public class ChatRoomServiceTest {
         }
 
         // then
-        List<ChatHistory> chatHistories = chatRoomService.readChatHistory(newMemberId, chatRoom.getRoomId());
+        List<ChatHistory> chatHistories = chatRoomService.readChatHistory(chatRoom.getRoomId(), newMemberId);
         Assertions.assertEquals(chatHistories.size(), 100);
         for(Long seq : seqList) {
             chatHistoryRepository.deleteBySeq(seq);

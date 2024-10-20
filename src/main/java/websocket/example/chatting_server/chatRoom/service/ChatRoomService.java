@@ -14,6 +14,6 @@ public interface ChatRoomService {
     ChatRoom create(Long memberId, String roomName);
     MemberChatRoom enter(Long memberId, Long roomId);
     void exit(Long memberId, Long roomId);
-    ChatHistory writeChatHistory(ChatDto chatDto);
-    List<ChatHistory> readChatHistory(Long memberId, Long roomId);
+    ChatHistory writeChatHistory(Long roomId, ChatDto chatDto);
+    List<ChatHistory> readChatHistory(Long roomId, Long memberId);
 }
