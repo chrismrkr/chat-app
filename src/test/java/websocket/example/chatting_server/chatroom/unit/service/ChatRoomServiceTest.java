@@ -3,19 +3,13 @@ package websocket.example.chatting_server.chatroom.unit.service;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.context.ApplicationEventPublisher;
-import websocket.example.chatting_server.chatRoom.infrastructure.ChatHistoryRepository;
+import websocket.example.chatting_server.chatRoom.infrastructure.*;
 import websocket.example.chatting_server.chatRoom.domain.MemberChatRoom;
-import websocket.example.chatting_server.chatRoom.infrastructure.ChatRoomEventHandler;
-import websocket.example.chatting_server.chatRoom.infrastructure.MemberChatRoomRepository;
 import websocket.example.chatting_server.chatRoom.service.ChatRoomService;
 import websocket.example.chatting_server.chatRoom.domain.ChatRoom;
 import websocket.example.chatting_server.chatRoom.service.event.ChatRoomExitEvent;
 import websocket.example.chatting_server.chatRoom.service.impl.ChatRoomServiceImpl;
-import websocket.example.chatting_server.chatRoom.infrastructure.ChatRoomRepository;
-import websocket.example.chatting_server.chatroom.unit.service.mock.MockChatHistoryRepository;
-import websocket.example.chatting_server.chatroom.unit.service.mock.MockChatRoomEventHandler;
-import websocket.example.chatting_server.chatroom.unit.service.mock.MockChatRoomRepository;
-import websocket.example.chatting_server.chatroom.unit.service.mock.MockMemberChatRoomRepository;
+import websocket.example.chatting_server.chatroom.unit.service.mock.*;
 
 import java.util.List;
 import java.util.Optional;
@@ -24,7 +18,8 @@ public class ChatRoomServiceTest {
     ChatRoomRepository chatRoomRepository = new MockChatRoomRepository();
     MemberChatRoomRepository memberChatRoomRepository = new MockMemberChatRoomRepository();
     ChatHistoryRepository chatHistoryRepository = new MockChatHistoryRepository();
-//    ChatRoomEventHandler chatRoomEventHandler = new MockChatRoomEventHandler(chatRoomRepository, memberChatRoomRepository);
+    ChatRoomCacheRepository chatRoomCacheRepository = new MockChatRoomCacheRepository();
+    //    ChatRoomEventHandler chatRoomEventHandler = new MockChatRoomEventHandler(chatRoomRepository, memberChatRoomRepository);
     ApplicationEventPublisher eventPublisher = new ApplicationEventPublisher() {
     @Override
     public void publishEvent(Object event) {
@@ -39,6 +34,7 @@ public class ChatRoomServiceTest {
     ChatRoomService chatRoomService = new ChatRoomServiceImpl(chatRoomRepository,
             memberChatRoomRepository,
             chatHistoryRepository,
+            chatRoomCacheRepository,
             eventPublisher
             );
     @Test
