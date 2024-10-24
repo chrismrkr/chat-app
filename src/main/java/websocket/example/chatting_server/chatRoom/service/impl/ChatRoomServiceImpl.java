@@ -88,7 +88,7 @@ public class ChatRoomServiceImpl implements ChatRoomService {
                 (() -> new IllegalArgumentException("[INVALID ROOM ID]: ROOM NOT FOUND BY " + chatDto.getRoomId()));
         ChatHistory chatHistory = chatRoom.createChatHistory(chatDto);
         // TODO. Redis에 ChatHistory 저장 추가할 것
-        chatHistory = chatRoomCacheRepository.write(roomId, chatHistory);
+        chatHistory = chatRoomCacheRepository.writeChatHistory(roomId, chatHistory);
         chatHistory = chatHistoryRepository.save(chatHistory);
         return chatHistory;
     }
@@ -100,4 +100,15 @@ public class ChatRoomServiceImpl implements ChatRoomService {
                 .orElseThrow(() -> new IllegalArgumentException("[INVALID MEMBER OR ROOM ID] NOT FOUND"));
         return chatHistoryRepository.findByRoomIdAndSendTimeAfter(roomId, enterDateTime);
     }
+
+    @Override
+    @ChatRoomHistoryLock
+    public List<ChatHistory> readChatHistoryCache(Long roomId, Long memberId) {
+        LocalDateTime enterDateTime = memberChatRoomRepository.findEnterDateTime(memberId, roomId)
+                .orElseThrow(() -> new IllegalArgumentException("[INVALID MEMBER OR ROOM ID] NOT FOUND"));
+
+
+        return null;
+    }
+
 }

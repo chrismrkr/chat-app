@@ -1,21 +1,29 @@
 package websocket.example.chatting_server.chatroom.medium.repository;
 
-import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.redisson.api.RBucket;
 import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import websocket.example.chatting_server.chatRoom.domain.ChatHistory;
 import websocket.example.chatting_server.chatRoom.infrastructure.ChatRoomCacheRepository;
 
-import java.util.Collections;
+import java.time.LocalDateTime;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @SpringBootTest
-
 public class ChatRoomCacheRepositoryTest {
     @Autowired
     ChatRoomCacheRepository chatRoomCacheRepository;
+    @Autowired
+    RedissonClient redissonClient;
+
     @Test
     void CHAT_ROOM에_분산락_획득_및_해제_가능() throws InterruptedException {
         // given
@@ -41,7 +49,6 @@ public class ChatRoomCacheRepositoryTest {
     @Test
     void CHAT_ROOM_분산락은_TTL_뒤에_자동으로_해제됨() throws InterruptedException {
         // given
-        Collections.binarySearch()
         Long roomId = 2L;
         // when
         long lockTimeOutMs = 100L;
@@ -59,4 +66,78 @@ public class ChatRoomCacheRepositoryTest {
         // then
         Assertions.assertEquals(chatRoomHistoryLock.isLocked(), false);
     }
+
+    @Test
+    void CHAT_ROOM_분산락이_이미_걸려있으면_다른_쪽에서는_접근_불가() throws InterruptedException {
+        // given
+        Long roomId = 3L;
+        // when
+        long lockTimeOutMs = 100L;
+        long TTL = 2 * 1000L;
+        AtomicInteger count = new AtomicInteger(0);
+
+        int threadCount = 5;
+        ExecutorService executorService = Executors.newFixedThreadPool(threadCount);
+        CountDownLatch countDownLatch = new CountDownLatch(threadCount);
+
+        for(long i=0; i<threadCount; i++) {
+            executorService.execute(() -> {
+                System.out.println("CURRENT COUNT : " + count.get()+1);
+                RLock chatRoomHistoryLock = chatRoomCacheRepository.getChatRoomHistoryLock(roomId);
+                try {
+                    if(chatRoomHistoryLock.tryLock(lockTimeOutMs, TTL, TimeUnit.MILLISECONDS)) {
+                        count.getAndIncrement();
+                        Thread.sleep(2000);
+                    }
+                } catch (InterruptedException ignored) {
+                    System.out.println("ERROR!");
+                } finally {
+                    countDownLatch.countDown();
+                    chatRoomHistoryLock.unlock();
+                }
+            });
+        }
+        countDownLatch.await();
+
+        // then
+        Assertions.assertEquals(count.get(), 1);
+    }
+
+    @Test
+    void ChatHistory를_Cache에_기록할_수_있음() {
+        Long roomId = 4L;
+        try {
+            // given
+            ChatHistory chatHistory = ChatHistory.builder()
+                    .roomId(roomId)
+                    .seq(1L)
+                    .senderName("kim")
+                    .message("hello1")
+                    .sendTime(LocalDateTime.now())
+                    .build();
+            // when
+            ChatHistory chatHistory1 = chatRoomCacheRepository.writeChatHistory(roomId, chatHistory);
+            // then
+            c
+
+        } finally {
+            RBucket<Object> bucket = redissonClient.getBucket("CHAT_ROOM_HISTORY_CACHE_" + Long.toString(roomId));
+            bucket.delete();
+        }
+    }
+
+    @Test
+    void ChatHistory를_Cache에_기록했으나_MAX_CACHE_SIZE를_초과하면_LRU_정책으로_제거() {
+        // given
+        // when
+        // then
+    }
+
+    @Test
+    void ChatHistory를_Cache에서_읽을_수_있음() {
+        // given
+        // when
+        // then
+    }
+
 }
