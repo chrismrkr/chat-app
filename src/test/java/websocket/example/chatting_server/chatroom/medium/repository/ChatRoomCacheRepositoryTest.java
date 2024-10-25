@@ -11,6 +11,7 @@ import websocket.example.chatting_server.chatRoom.domain.ChatHistory;
 import websocket.example.chatting_server.chatRoom.infrastructure.ChatRoomCacheRepository;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -118,7 +119,9 @@ public class ChatRoomCacheRepositoryTest {
             // when
             ChatHistory chatHistory1 = chatRoomCacheRepository.writeChatHistory(roomId, chatHistory);
             // then
-            c
+            List<ChatHistory> chatHistories = chatRoomCacheRepository.readChatHistory(roomId);
+            Assertions.assertEquals(chatHistories.size(), 1);
+            Assertions.assertEquals(chatHistories.get(0).getSeq(), 1L);
 
         } finally {
             RBucket<Object> bucket = redissonClient.getBucket("CHAT_ROOM_HISTORY_CACHE_" + Long.toString(roomId));
@@ -129,15 +132,27 @@ public class ChatRoomCacheRepositoryTest {
     @Test
     void ChatHistory를_Cache에_기록했으나_MAX_CACHE_SIZE를_초과하면_LRU_정책으로_제거() {
         // given
-        // when
-        // then
+        Long roomId = 5L;
+        int MAX_CACHE_SIZE = 100;
+        try {
+            // when
+            for(int i=0; i<MAX_CACHE_SIZE + 5; i++) {
+                ChatHistory chatHistory = ChatHistory.builder()
+                        .roomId(roomId)
+                        .seq((long) i)
+                        .senderName("kim")
+                        .message("hello1")
+                        .sendTime(LocalDateTime.now())
+                        .build();
+                chatRoomCacheRepository.writeChatHistory(roomId, chatHistory);
+            }
+            // then
+            List<ChatHistory> chatHistories = chatRoomCacheRepository.readChatHistory(roomId);
+            Assertions.assertEquals(chatHistories.size(), 100);
+            Assertions.assertEquals(chatHistories.get(MAX_CACHE_SIZE - 1).getSeq(), 5);
+        } finally {
+            RBucket<Object> bucket = redissonClient.getBucket("CHAT_ROOM_HISTORY_CACHE_" + Long.toString(roomId));
+            bucket.delete();
+        }
     }
-
-    @Test
-    void ChatHistory를_Cache에서_읽을_수_있음() {
-        // given
-        // when
-        // then
-    }
-
 }

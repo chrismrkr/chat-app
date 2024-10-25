@@ -17,7 +17,7 @@ public class ChatRoomCacheRepositoryImpl implements ChatRoomCacheRepository {
     private final RedissonClient redissonClient;
     private static final String CHAT_ROOM_HISTORY_LOCK_PREFIX = "CHAT_ROOM_HISTORY_LOCK_";
     private static final String CHAT_ROOM_HISTORY_CACHE_PREFIX = "CHAT_ROOM_HISTORY_CACHE_";
-    private static final int MAX_CACHE_SIZE = 200;
+    private static final int MAX_CACHE_SIZE = 100;
     @Override
     public RLock getChatRoomHistoryLock(Long roomId) {
         String key = CHAT_ROOM_HISTORY_LOCK_PREFIX + Long.toString(roomId);

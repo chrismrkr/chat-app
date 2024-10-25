@@ -106,9 +106,9 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     public List<ChatHistory> readChatHistoryCache(Long roomId, Long memberId) {
         LocalDateTime enterDateTime = memberChatRoomRepository.findEnterDateTime(memberId, roomId)
                 .orElseThrow(() -> new IllegalArgumentException("[INVALID MEMBER OR ROOM ID] NOT FOUND"));
-
-
-        return null;
+        return chatRoomCacheRepository.readChatHistory(roomId)
+                .stream().filter(history -> history.getSendTime().isAfter(enterDateTime))
+                .toList();
     }
 
 }
