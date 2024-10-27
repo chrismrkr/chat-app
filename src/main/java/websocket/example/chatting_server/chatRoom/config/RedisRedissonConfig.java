@@ -22,5 +22,4 @@ public class RedisRedissonConfig {
         config.useSingleServer().setAddress(REDISSON_HOST_PREFIX + host + ":" + port);
         return Redisson.create(config);
     }
-
 }

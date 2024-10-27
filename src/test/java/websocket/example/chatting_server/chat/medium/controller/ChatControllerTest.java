@@ -21,11 +21,13 @@ import org.springframework.web.socket.messaging.WebSocketStompClient;
 import websocket.example.chatting_server.chat.config.RabbitMQConfig;
 import websocket.example.chatting_server.chat.config.WebSocketConfig;
 import websocket.example.chatting_server.chat.controller.dto.ChatDto;
+import websocket.example.chatting_server.chatRoom.domain.ChatRoom;
 import websocket.example.chatting_server.chatRoom.infrastructure.ChatHistoryRepository;
 import websocket.example.chatting_server.chat.infrastructure.impl.InMemoryOutboundChannelHistoryRepository;
 import websocket.example.chatting_server.chat.infrastructure.impl.RedisLockRepositoryImpl;
 import websocket.example.chatting_server.chat.interceptor.SessionIdRegisterInterceptor;
 import websocket.example.chatting_server.chat.utils.ChatIdGenerateUtils;
+import websocket.example.chatting_server.chatRoom.infrastructure.ChatRoomRepository;
 
 import java.lang.reflect.Type;
 import java.util.*;
@@ -51,6 +53,8 @@ public class ChatControllerTest {
     SessionIdRegisterInterceptor sessionIdRegisterInterceptor;
     @Autowired
     ChatHistoryRepository chatHistoryRepository;
+    @Autowired
+    ChatRoomRepository chatRoomRepository;
     WebSocketStompClient stompClient;
     CompletableFuture<ChatDto> completableFuture;
     CompletableFuture<Void> sessionConnectedReady;
@@ -81,7 +85,9 @@ public class ChatControllerTest {
     @Test
     void 웹소켓_1개_연결이_메세지를_전달할_수_있다() throws Exception {
         // given
-        connectedSession.subscribe("/exchange/chat.exchange/roomId.1", new StompFrameHandler() {
+        String roomId = "1";
+        ChatRoom chatRoom = chatRoomRepository.create("room" + roomId);
+        connectedSession.subscribe("/exchange/chat.exchange/roomId." + chatRoom.getRoomId(), new StompFrameHandler() {
             @Override
             public Type getPayloadType(StompHeaders headers) {
                 return ChatDto.class;
@@ -94,9 +100,9 @@ public class ChatControllerTest {
         Thread.sleep(1000);
 
         // when
-        String roomId = "1";
-        connectedSession.send("/app/message/" + roomId,
+        connectedSession.send("/app/message/" + chatRoom.getRoomId(),
                 ChatDto.builder()
+                        .roomId(chatRoom.getRoomId())
                         .senderName("USR1")
                         .message("HELLO")
                         .build()
@@ -105,7 +111,7 @@ public class ChatControllerTest {
         // then
         ChatDto chatDto = completableFuture.get(1000, TimeUnit.SECONDS);
         Assertions.assertNotNull(chatDto);
-        Assertions.assertEquals(1L, chatDto.getRoomId());
+        Assertions.assertEquals(chatRoom.getRoomId(), chatDto.getRoomId());
         Assertions.assertEquals("USR1", chatDto.getSenderName());
         Assertions.assertEquals("HELLO", chatDto.getMessage());
         Assertions.assertNotNull(chatDto.getSenderSessionId());
@@ -122,6 +128,12 @@ public class ChatControllerTest {
         List<StompSession> connectedSessionList = new ArrayList<>();
         List<CompletableFuture<Void>> sessionReadyList = new ArrayList<>();
         List<CompletableFuture<ChatDto>> completableFutureList = new ArrayList<>();
+        List<ChatRoom> chatRoomList = new ArrayList<>();
+        for(int i=0; i<sessionCount; i++) {
+            String roomId = Integer.toString(i);
+            ChatRoom chatRoom = chatRoomRepository.create("room" + roomId);
+            chatRoomList.add(chatRoom);
+        }
         for(int i=0; i<sessionCount; i++) {
             CompletableFuture<Void> sessionReady = new CompletableFuture<>();
             StompSession newStomp = stompClient
@@ -144,9 +156,8 @@ public class ChatControllerTest {
             completableFutureList.add(new CompletableFuture<>());
         }
         for(int i=0; i<sessionCount; i++) {
-            String roomId = Integer.toString(i);
             int finalI = i;
-            connectedSessionList.get(i).subscribe("/exchange/chat.exchange/roomId." + roomId, new StompFrameHandler() {
+            connectedSessionList.get(i).subscribe("/exchange/chat.exchange/roomId." + chatRoomList.get(i).getRoomId(), new StompFrameHandler() {
                 @Override
                 public Type getPayloadType(StompHeaders headers) {
                     return ChatDto.class;
@@ -161,17 +172,19 @@ public class ChatControllerTest {
 
         // when
         for(int i=0; i<sessionCount; i++) {
-            String roomId = Integer.toString(i);
-            connectedSessionList.get(i).send("/app/message/" + roomId,
+            connectedSessionList.get(i).send("/app/message/" + chatRoomList.get(i).getRoomId(),
                     ChatDto.builder()
-                            .senderName("USR" + roomId)
-                            .message("HELLO" + roomId)
+                            .roomId(chatRoomList.get(i).getRoomId())
+                            .senderName("USR" + chatRoomList.get(i).getRoomId())
+                            .message("HELLO" + chatRoomList.get(i).getRoomId())
                             .build()
             );
         }
+
         // then
         for(int i=0; i<sessionCount; i++) {
-            String roomId = Integer.toString(i);
+            ChatRoom chatRoom = chatRoomList.get(i);
+            String roomId = Long.toString(chatRoom.getRoomId());
             ChatDto chatDto = completableFutureList.get(i).get(300, TimeUnit.SECONDS);
             Assertions.assertNotNull(chatDto);
             Assertions.assertEquals(Integer.parseInt(roomId), chatDto.getRoomId());
@@ -188,6 +201,8 @@ public class ChatControllerTest {
     @Test
     void 메세지를_전달하면_message_seq를_기록한다() throws InterruptedException, ExecutionException, TimeoutException {
         // given
+        String roomId = "1";
+        ChatRoom chatRoom = chatRoomRepository.create("room" + roomId);
         connectedSession.subscribe("/exchange/chat.exchange/roomId.1", new StompFrameHandler() {
             @Override
             public Type getPayloadType(StompHeaders headers) {
@@ -201,9 +216,9 @@ public class ChatControllerTest {
         Thread.sleep(1000);
 
         // when
-        String roomId = "1";
-        connectedSession.send("/app/message/" + roomId,
+        connectedSession.send("/app/message/" + chatRoom.getRoomId(),
                 ChatDto.builder()
+                        .roomId(chatRoom.getRoomId())
                         .senderName("USR1")
                         .message("HELLO")
                         .build()
@@ -211,7 +226,7 @@ public class ChatControllerTest {
         // then
         ChatDto chatDto = completableFuture.get(20, TimeUnit.SECONDS);
         Assertions.assertNotNull(chatDto);
-        Assertions.assertEquals(1L, chatDto.getRoomId());
+        Assertions.assertEquals(chatRoom.getRoomId(), chatDto.getRoomId());
         Assertions.assertEquals("USR1", chatDto.getSenderName());
         Assertions.assertEquals("HELLO", chatDto.getMessage());
         Assertions.assertNotNull(chatDto.getSenderSessionId());
@@ -241,8 +256,10 @@ public class ChatControllerTest {
 
         // when1
         String roomId = "1";// ex. 1825044961289043968
-        connectedSession.send("/app/message/" + roomId,
+        ChatRoom chatRoom1 = chatRoomRepository.create("room" + roomId);
+        connectedSession.send("/app/message/" + chatRoom1.getRoomId(),
                 ChatDto.builder()
+                        .roomId(chatRoom1.getRoomId())
                         .senderName("USR1")
                         .message("HELLO1")
                         .build()
@@ -250,7 +267,7 @@ public class ChatControllerTest {
         // then1
         ChatDto chatDto = completableFuture.get(20, TimeUnit.SECONDS);
         Assertions.assertNotNull(chatDto);
-        Assertions.assertEquals(1L, chatDto.getRoomId());
+        Assertions.assertEquals(chatRoom1.getRoomId(), chatDto.getRoomId());
         Assertions.assertEquals("USR1", chatDto.getSenderName());
         Assertions.assertEquals("HELLO1", chatDto.getMessage());
         Assertions.assertNotNull(chatDto.getSenderSessionId());
@@ -260,8 +277,9 @@ public class ChatControllerTest {
 
         // when2
         completableFuture = new CompletableFuture<>();
-        connectedSession.send("/app/message/" + roomId,
+        connectedSession.send("/app/message/" + chatRoom1.getRoomId(),
                 ChatDto.builder()
+                        .roomId(chatRoom1.getRoomId())
                         .senderName("USR1")
                         .message("HELLO2")
                         .build()
