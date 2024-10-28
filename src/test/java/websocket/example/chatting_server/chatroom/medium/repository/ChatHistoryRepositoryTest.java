@@ -139,4 +139,36 @@ public class ChatHistoryRepositoryTest {
         }
         Assertions.assertEquals(chatHistoryRepository.findByRoomId(roomId).size(), 0);
     }
+
+    @Test
+    void chatHistory를_roomId_및_특정_seq_이전_N개_조회함() {
+        // given
+        int chatHistoryNumber = 1000;
+        long roomId = 5L;
+        int size = 100;
+        try {
+            for (long i = 0; i < chatHistoryNumber; i++) {
+                ChatHistory chatHistory = ChatHistory.builder()
+                        .roomId(roomId)
+                        .seq(i)
+                        .senderName("kim")
+                        .message("hello " + Long.toString(i))
+                        .sendTime(LocalDateTime.now())
+                        .build();
+                chatHistoryRepository.save(chatHistory);
+            }
+            // when
+            List<ChatHistory> list1 = chatHistoryRepository.findByRoomIdAndSeqLessThan(roomId, -1L, size);
+            Assertions.assertEquals(list1.size(), 100);
+            Assertions.assertEquals(list1.get(99), 99);
+
+            
+
+            // then
+        } finally {
+            for(long i=0; i<chatHistoryNumber; i++) {
+                chatHistoryRepository.deleteBySeq(i);
+            }
+        }
+    }
 }

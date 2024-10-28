@@ -2,6 +2,7 @@ package websocket.example.chatting_server.chatRoom.infrastructure.impl;
 
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 import websocket.example.chatting_server.chatRoom.domain.ChatHistory;
 import websocket.example.chatting_server.chatRoom.infrastructure.ChatHistoryEsRepository;
@@ -16,6 +17,14 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class ChatHistoryRepositoryImpl implements ChatHistoryRepository {
     private final ChatHistoryEsRepository chatHistoryEsRepository;
+
+    @Override
+    public List<ChatHistory> findByRoomIdAndSeqLessThan(Long roomId, Long currentSeq, int size) {
+        List<ChatHistoryEntity> byRoomIdAndSeqLessThan = chatHistoryEsRepository.findByRoomIdAndSeqLessThan(roomId, currentSeq, Pageable.ofSize(100));
+        return byRoomIdAndSeqLessThan.stream()
+                .map(ChatHistory::from)
+                .toList();
+    }
 
     @Override
     public List<ChatHistory> findByRoomIdAndSendTimeAfter(Long roomId, LocalDateTime at) {

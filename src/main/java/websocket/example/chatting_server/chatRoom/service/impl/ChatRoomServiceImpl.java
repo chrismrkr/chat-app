@@ -87,7 +87,6 @@ public class ChatRoomServiceImpl implements ChatRoomService {
         ChatRoom chatRoom = chatRoomRepository.findById(chatDto.getRoomId()).orElseThrow
                 (() -> new IllegalArgumentException("[INVALID ROOM ID]: ROOM NOT FOUND BY " + chatDto.getRoomId()));
         ChatHistory chatHistory = chatRoom.createChatHistory(chatDto);
-        // TODO. Redis에 ChatHistory 저장 추가할 것
         chatHistory = chatRoomCacheRepository.writeChatHistory(roomId, chatHistory);
         chatHistory = chatHistoryRepository.save(chatHistory);
         return chatHistory;
