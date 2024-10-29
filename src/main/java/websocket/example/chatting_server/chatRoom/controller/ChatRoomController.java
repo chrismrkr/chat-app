@@ -57,7 +57,7 @@ public class ChatRoomController {
     }
 
     @GetMapping("/history/{roomId}/{memberId}")
-    public ResponseEntity<ChatHistoriesResponse> getChatroomHistories(@PathVariable Long memberId, @PathVariable Long roomId,  @RequestParam String seq, @RequestParam String size) {
+    public ResponseEntity<ChatHistoriesResponse> getChatroomHistories(@PathVariable Long memberId, @PathVariable Long roomId,  @RequestParam(required = false) String seq, @RequestParam(required = false) String size) {
         List<ChatHistory> chatHistories = null;
         if(seq != null && size != null) {
             chatHistories = chatRoomService.readChatHistory(roomId, memberId, Long.parseLong(seq), Integer.parseInt(size));

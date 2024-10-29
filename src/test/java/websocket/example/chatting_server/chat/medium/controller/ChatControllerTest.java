@@ -4,6 +4,7 @@ import org.awaitility.Awaitility;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -201,9 +202,9 @@ public class ChatControllerTest {
     @Test
     void 메세지를_전달하면_message_seq를_기록한다() throws InterruptedException, ExecutionException, TimeoutException {
         // given
-        String roomId = "1";
+        String roomId = "101";
         ChatRoom chatRoom = chatRoomRepository.create("room" + roomId);
-        connectedSession.subscribe("/exchange/chat.exchange/roomId.1", new StompFrameHandler() {
+        connectedSession.subscribe("/exchange/chat.exchange/roomId." + chatRoom.getRoomId(), new StompFrameHandler() {
             @Override
             public Type getPayloadType(StompHeaders headers) {
                 return ChatDto.class;
@@ -213,7 +214,7 @@ public class ChatControllerTest {
                 completableFuture.complete((ChatDto) payload);
             }
         });
-        Thread.sleep(1000);
+        Thread.sleep(1500);
 
         // when
         connectedSession.send("/app/message/" + chatRoom.getRoomId(),
@@ -224,7 +225,7 @@ public class ChatControllerTest {
                         .build()
         );
         // then
-        ChatDto chatDto = completableFuture.get(300, TimeUnit.SECONDS);
+        ChatDto chatDto = completableFuture.get(20, TimeUnit.SECONDS);
         Assertions.assertNotNull(chatDto);
         Assertions.assertEquals(chatRoom.getRoomId(), chatDto.getRoomId());
         Assertions.assertEquals("USR1", chatDto.getSenderName());
@@ -239,10 +240,12 @@ public class ChatControllerTest {
     @Test
     void 동일한_seq로_메세지를_순서대로_전달하면_2번째_부터는_무시된다() throws InterruptedException, ExecutionException, TimeoutException {
         // given
+        String roomId = "102";
+        ChatRoom chatRoom = chatRoomRepository.create("room" + roomId);
         ChatIdGenerateUtils mockChatIdGenerateUtils = Mockito.mock(ChatIdGenerateUtils.class);
         Mockito.when(mockChatIdGenerateUtils.nextId()).thenReturn(1825044961289043968L);
         ReflectionTestUtils.setField(sessionIdRegisterInterceptor, "chatIdGenerateUtils", mockChatIdGenerateUtils);
-        connectedSession.subscribe("/exchange/chat.exchange/roomId.1", new StompFrameHandler() {
+        connectedSession.subscribe("/exchange/chat.exchange/roomId." + chatRoom.getRoomId(), new StompFrameHandler() {
             @Override
             public Type getPayloadType(StompHeaders headers) {
                 return ChatDto.class;
@@ -252,22 +255,20 @@ public class ChatControllerTest {
                 completableFuture.complete((ChatDto) payload);
             }
         });
-        Thread.sleep(1000);
+        Thread.sleep(1500);
 
         // when1
-        String roomId = "1";// ex. 1825044961289043968
-        ChatRoom chatRoom1 = chatRoomRepository.create("room" + roomId);
-        connectedSession.send("/app/message/" + chatRoom1.getRoomId(),
+        connectedSession.send("/app/message/" + chatRoom.getRoomId(),
                 ChatDto.builder()
-                        .roomId(chatRoom1.getRoomId())
+                        .roomId(chatRoom.getRoomId())
                         .senderName("USR1")
                         .message("HELLO1")
                         .build()
         );
         // then1
-        ChatDto chatDto = completableFuture.get(300, TimeUnit.SECONDS);
+        ChatDto chatDto = completableFuture.get(20, TimeUnit.SECONDS);
         Assertions.assertNotNull(chatDto);
-        Assertions.assertEquals(chatRoom1.getRoomId(), chatDto.getRoomId());
+        Assertions.assertEquals(chatRoom.getRoomId(), chatDto.getRoomId());
         Assertions.assertEquals("USR1", chatDto.getSenderName());
         Assertions.assertEquals("HELLO1", chatDto.getMessage());
         Assertions.assertNotNull(chatDto.getSenderSessionId());
@@ -277,9 +278,9 @@ public class ChatControllerTest {
 
         // when2
         completableFuture = new CompletableFuture<>();
-        connectedSession.send("/app/message/" + chatRoom1.getRoomId(),
+        connectedSession.send("/app/message/" + chatRoom.getRoomId(),
                 ChatDto.builder()
-                        .roomId(chatRoom1.getRoomId())
+                        .roomId(chatRoom.getRoomId())
                         .senderName("USR1")
                         .message("HELLO2")
                         .build()

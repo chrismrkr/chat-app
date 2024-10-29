@@ -190,44 +190,48 @@ public class ChatRoomServiceTest {
         String roomName = "room12";
         ChatRoom chatRoom = chatRoomService.create(memberId, roomName);
         List<Long> seqList = new ArrayList<>();
+        try {
+            for (int i = 0; i < 10; i++) {
+                long seq = chatIdGenerateUtils.nextId();
+                ChatHistory write = chatRoomService.writeChatHistory(
+                        chatRoom.getRoomId(),
+                        ChatDto.builder()
+                                .seq(seq)
+                                .roomId(chatRoom.getRoomId())
+                                .senderName("member")
+                                .message("hello")
+                                .build()
+                );
+                seqList.add(seq);
+            }
 
-        for(int i=0; i<10; i++) {
-            long seq = chatIdGenerateUtils.nextId();
-            ChatHistory write = chatRoomService.writeChatHistory(
-                    chatRoom.getRoomId(),
-                    ChatDto.builder()
-                            .seq(seq)
-                            .roomId(chatRoom.getRoomId())
-                            .senderName("member")
-                            .message("hello")
-                            .build()
-            );
-            seqList.add(seq);
-        }
+            // when
+            Thread.sleep(100);
+            chatRoomService.enter(newMemberId, chatRoom.getRoomId());
+            Thread.sleep(100);
+            for (int i = 0; i < 100; i++) {
+                long seq = chatIdGenerateUtils.nextId();
+                chatRoomService.writeChatHistory(
+                        chatRoom.getRoomId(),
+                        ChatDto.builder()
+                                .seq(seq)
+                                .roomId(chatRoom.getRoomId())
+                                .senderName("member")
+                                .message("hello")
+                                .build()
+                );
+                seqList.add(seq);
+            }
 
-        // when
-        Thread.sleep(100);
-        chatRoomService.enter(newMemberId, chatRoom.getRoomId());
-        Thread.sleep(100);
-        for(int i=0; i<100; i++) {
-            long seq = chatIdGenerateUtils.nextId();
-            chatRoomService.writeChatHistory(
-                    chatRoom.getRoomId(),
-                    ChatDto.builder()
-                            .seq(seq)
-                            .roomId(chatRoom.getRoomId())
-                            .senderName("member")
-                            .message("hello")
-                            .build()
-            );
-            seqList.add(seq);
-        }
-
-        // then
-        List<ChatHistory> chatHistories = chatRoomService.readChatHistory(chatRoom.getRoomId(), newMemberId);
-        Assertions.assertEquals(chatHistories.size(), 100);
-        for(Long seq : seqList) {
-            chatHistoryRepository.deleteBySeq(seq);
+            // then
+            List<ChatHistory> chatHistories = chatRoomService.readChatHistory(chatRoom.getRoomId(), newMemberId);
+            Assertions.assertEquals(chatHistories.size(), 100);
+        } finally {
+            for (Long seq : seqList) {
+                chatHistoryRepository.deleteBySeq(seq);
+            }
+            RBucket<Object> bucket = redissonClient.getBucket("CHAT_ROOM_HISTORY_CACHE_" + Long.toString(chatRoom.getRoomId()));
+            bucket.delete();
         }
     }
 
