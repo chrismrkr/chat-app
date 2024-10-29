@@ -9,7 +9,7 @@ import java.util.Optional;
 
 public class MockChatHistoryRepository implements ChatHistoryRepository {
     @Override
-    public List<ChatHistory> findByRoomIdAndSeqLessThan(Long roomId, Long currentSeq, int size) {
+    public List<ChatHistory> findByRoomIdAndSeqLessThanAndSendTimeAfter(Long roomId, Long currentSeq, LocalDateTime at, int size) {
         return List.of();
     }
 

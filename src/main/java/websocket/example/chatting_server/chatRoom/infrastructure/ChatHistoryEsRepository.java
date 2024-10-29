@@ -9,9 +9,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public interface ChatHistoryEsRepository extends ElasticsearchRepository<ChatHistoryEntity, Long> {
-    List<ChatHistoryEntity> findByRoomIdAndSeqLessThanOrderBySeqDesc(Long roomId, Long seq, Pageable pageable);
+    List<ChatHistoryEntity> findByRoomIdAndSeqLessThanAndSendTimeAfterOrderBySeqDesc(Long roomId, Long seq, LocalDateTime sendTime, Pageable pageable);
     List<ChatHistoryEntity> findByRoomIdAndSendTimeAfterOrderBySeq(Long roomId, LocalDateTime sendTime);
     List<ChatHistoryEntity> findByRoomId(Long roomId);
     List<ChatHistoryEntity> findByRoomIdOrderBySeq(Long roomId);
-    Page<ChatHistoryEntity> findByRoomIdOrderBySeq(Long roomId, Pageable pageable);
 }

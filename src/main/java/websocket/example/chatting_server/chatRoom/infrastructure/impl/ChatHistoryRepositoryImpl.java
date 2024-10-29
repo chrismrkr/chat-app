@@ -20,14 +20,15 @@ public class ChatHistoryRepositoryImpl implements ChatHistoryRepository {
     private final ChatHistoryEsRepository chatHistoryEsRepository;
 
     @Override
-    public List<ChatHistory> findByRoomIdAndSeqLessThan(Long roomId, Long currentSeq, int size) {
+    public List<ChatHistory> findByRoomIdAndSeqLessThanAndSendTimeAfter(Long roomId, Long currentSeq, LocalDateTime at, int size) {
         List<ChatHistoryEntity> byRoomIdAndSeqLessThan = chatHistoryEsRepository
-                .findByRoomIdAndSeqLessThanOrderBySeqDesc(roomId, currentSeq, PageRequest.of(0, size));
-
-        return byRoomIdAndSeqLessThan.stream()
+                .findByRoomIdAndSeqLessThanAndSendTimeAfterOrderBySeqDesc(roomId, currentSeq, at, Pageable.ofSize(size));
+        List<ChatHistory> list = byRoomIdAndSeqLessThan.stream()
                 .map(ChatHistory::from)
+                .filter(h1 -> h1.getSeq() < currentSeq)
                 .sorted((h1, h2) -> h1.getSeq() < h2.getSeq() ? -1 : 1)
                 .toList();
+        return list;
     }
 
     @Override

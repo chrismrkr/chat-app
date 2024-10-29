@@ -57,8 +57,13 @@ public class ChatRoomController {
     }
 
     @GetMapping("/history/{roomId}/{memberId}")
-    public ResponseEntity<ChatHistoriesResponse> getChatroomHistories(@PathVariable Long memberId, @PathVariable Long roomId) {
-        List<ChatHistory> chatHistories = chatRoomService.readChatHistory(roomId, memberId);
+    public ResponseEntity<ChatHistoriesResponse> getChatroomHistories(@PathVariable Long memberId, @PathVariable Long roomId,  @RequestParam String seq, @RequestParam String size) {
+        List<ChatHistory> chatHistories = null;
+        if(seq != null && size != null) {
+            chatHistories = chatRoomService.readChatHistory(roomId, memberId, Long.parseLong(seq), Integer.parseInt(size));
+        } else {
+            chatHistories = chatRoomService.readChatHistoryCache(roomId, memberId);
+        }
         return new ResponseEntity<>(new ChatHistoriesResponse(roomId, chatHistories), HttpStatus.OK);
     }
 }

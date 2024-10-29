@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface ChatHistoryRepository {
-    List<ChatHistory> findByRoomIdAndSeqLessThan(Long roomId, Long currentSeq, int size);
+    List<ChatHistory> findByRoomIdAndSeqLessThanAndSendTimeAfter(Long roomId, Long currentSeq, LocalDateTime at, int size);
     List<ChatHistory> findByRoomIdAndSendTimeAfter(Long roomId, LocalDateTime at);
     List<ChatHistory> findByRoomIdOrderBySeq(Long roomId);
     List<ChatHistory> findByRoomId(Long roomId);

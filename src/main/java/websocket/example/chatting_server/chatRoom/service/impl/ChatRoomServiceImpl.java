@@ -102,6 +102,14 @@ public class ChatRoomServiceImpl implements ChatRoomService {
 
     @Override
     @ChatRoomHistoryLock
+    public List<ChatHistory> readChatHistory(Long roomId, Long memberId, long currentSeq, int size) {
+        LocalDateTime enterDateTime = memberChatRoomRepository.findEnterDateTime(memberId, roomId)
+                .orElseThrow(() -> new IllegalArgumentException("[INVALID MEMBER OR ROOM ID] NOT FOUND"));
+        return chatHistoryRepository.findByRoomIdAndSeqLessThanAndSendTimeAfter(roomId, currentSeq, enterDateTime, size);
+    }
+
+    @Override
+    @ChatRoomHistoryLock
     public List<ChatHistory> readChatHistoryCache(Long roomId, Long memberId) {
         LocalDateTime enterDateTime = memberChatRoomRepository.findEnterDateTime(memberId, roomId)
                 .orElseThrow(() -> new IllegalArgumentException("[INVALID MEMBER OR ROOM ID] NOT FOUND"));
@@ -109,5 +117,4 @@ public class ChatRoomServiceImpl implements ChatRoomService {
                 .stream().filter(history -> history.getSendTime().isAfter(enterDateTime))
                 .toList();
     }
-
 }

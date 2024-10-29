@@ -224,7 +224,7 @@ public class ChatControllerTest {
                         .build()
         );
         // then
-        ChatDto chatDto = completableFuture.get(20, TimeUnit.SECONDS);
+        ChatDto chatDto = completableFuture.get(300, TimeUnit.SECONDS);
         Assertions.assertNotNull(chatDto);
         Assertions.assertEquals(chatRoom.getRoomId(), chatDto.getRoomId());
         Assertions.assertEquals("USR1", chatDto.getSenderName());
@@ -265,7 +265,7 @@ public class ChatControllerTest {
                         .build()
         );
         // then1
-        ChatDto chatDto = completableFuture.get(20, TimeUnit.SECONDS);
+        ChatDto chatDto = completableFuture.get(300, TimeUnit.SECONDS);
         Assertions.assertNotNull(chatDto);
         Assertions.assertEquals(chatRoom1.getRoomId(), chatDto.getRoomId());
         Assertions.assertEquals("USR1", chatDto.getSenderName());

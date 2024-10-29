@@ -16,5 +16,6 @@ public interface ChatRoomService {
     void exit(Long memberId, Long roomId);
     ChatHistory writeChatHistory(Long roomId, ChatDto chatDto);
     List<ChatHistory> readChatHistory(Long roomId, Long memberId);
+    List<ChatHistory> readChatHistory(Long roomId, Long memberId, long currentSeq, int size);
     List<ChatHistory> readChatHistoryCache(Long roomId, Long memberId);
 }

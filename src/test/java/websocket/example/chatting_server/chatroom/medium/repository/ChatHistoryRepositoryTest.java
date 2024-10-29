@@ -11,6 +11,7 @@ import websocket.example.chatting_server.chat.utils.ChatIdGenerateUtils;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @SpringBootTest
@@ -79,7 +80,7 @@ public class ChatHistoryRepositoryTest {
     @Test
     void chatHistory를_roomId로_조회하고_seq로_정렬() {
         // given
-        int chatHistoryNumber = 50;
+        int chatHistoryNumber = 500;
         long roomId = 3L;
         long[] seqArr = new long[chatHistoryNumber];
         try {
@@ -90,7 +91,8 @@ public class ChatHistoryRepositoryTest {
                         .seq(seq)
                         .roomId(roomId)
                         .senderName("test")
-                        .message("hello world")
+                        .message("hello world" + i)
+                        .sendTime(LocalDateTime.now())
                         .build());
             }
 
@@ -157,31 +159,34 @@ public class ChatHistoryRepositoryTest {
     }
 
     @Test
-    void chatHistory중_특정_roomId이고_특정_seq_이전_N개_조회함() throws InterruptedException {
+    void chatHistory중_특정_roomId_및_특정_seq_이전_N개씩_페이징_조회함() throws InterruptedException {
         // given
         int chatHistoryNumber = 1000;
         long roomId = 5L;
-        int size = 111;
+        int size = 120;
+        LocalDateTime enterTime = LocalDateTime.now();
+        List<Long> seqList = new ArrayList<>();
         try {
-            for (long i = 0; i < chatHistoryNumber; i++) {
-                ChatHistory chatHistory = ChatHistory.builder()
+            for (int i = 0; i < chatHistoryNumber; i++) {
+                long seq = chatIdGenerateUtils.nextId();
+                seqList.add(seq);
+                chatHistoryRepository.save(ChatHistory.builder()
+                        .seq(seq)
                         .roomId(roomId)
-                        .seq(chatIdGenerateUtils.nextId())
-                        .senderName("kim")
-                        .message("hello " + Long.toString(i))
+                        .senderName("test")
+                        .message("hello world" + i)
                         .sendTime(LocalDateTime.now())
-                        .build();
-                chatHistoryRepository.save(chatHistory);
+                        .build());
             }
 
-            Thread.sleep(2000);
+            // when
 
             long currentSeq = chatIdGenerateUtils.nextId();
             int remains = chatHistoryNumber;
             while(remains > 0) {
                 // when
                 LocalDateTime startTime = LocalDateTime.now();
-                List<ChatHistory> list = chatHistoryRepository.findByRoomIdAndSeqLessThan(roomId, currentSeq, size);
+                List<ChatHistory> list = chatHistoryRepository.findByRoomIdAndSeqLessThanAndSendTimeAfter(roomId, currentSeq, enterTime, size);
                 LocalDateTime endTime = LocalDateTime.now();
                 log.info("[CONSUMED TIME for READING {} HISTORY] {}ms", list.size(), Duration.between(startTime, endTime).toMillis());
                 remains -= list.size();
@@ -195,6 +200,65 @@ public class ChatHistoryRepositoryTest {
             }
         } catch (Exception e) {
           throw e;
+        } finally {
+            for(int i=0; i<chatHistoryNumber; i++) {
+                chatHistoryRepository.deleteBySeq(seqList.get(i));
+            }
+        }
+    }
+
+    @Test
+    void chatHistory중_특정_roomId_및_enterDateTime_이후_기준으로_N개씩_페이징_조회() throws InterruptedException {
+        int chatHistoryNumber = 1000;
+        long roomId = 5L;
+        int size = 120;
+        List<Long> seqList = new ArrayList<>();
+        try {
+            // given
+            for(int i=0; i<chatHistoryNumber/2; i++) {
+                long seq = chatIdGenerateUtils.nextId();
+                seqList.add(seq);
+                chatHistoryRepository.save(ChatHistory.builder()
+                        .seq(seq)
+                        .roomId(roomId)
+                        .senderName("test")
+                        .message("hello world" + i)
+                        .sendTime(LocalDateTime.now())
+                        .build());
+            }
+            // chatHistoryNumber/2 개 먼저 생성 -> EnterTime 지정 -> 나머지 chatHistoryNumber/2개 생성
+            LocalDateTime enterTime = LocalDateTime.now();
+            for(int i=chatHistoryNumber/2; i<chatHistoryNumber; i++) {
+                long seq = chatIdGenerateUtils.nextId();
+                seqList.add(seq);
+                chatHistoryRepository.save(ChatHistory.builder()
+                        .seq(seq)
+                        .roomId(roomId)
+                        .senderName("test")
+                        .message("hello world" + i)
+                        .sendTime(LocalDateTime.now())
+                        .build());
+            }
+
+            // when
+            long currentSeq = chatIdGenerateUtils.nextId();
+            int remains = chatHistoryNumber / 2;
+            while(remains > 0) {
+                // when
+                LocalDateTime startTime = LocalDateTime.now();
+                List<ChatHistory> list = chatHistoryRepository.findByRoomIdAndSeqLessThanAndSendTimeAfter(roomId, currentSeq, enterTime, size);
+                LocalDateTime endTime = LocalDateTime.now();
+                log.info("[CONSUMED TIME for READING {} HISTORY] {}ms", list.size(), Duration.between(startTime, endTime).toMillis());
+                remains -= list.size();
+                // then
+                for(int i=0; i<list.size()-1; i++) {
+                    int finalI = i;
+                    Assertions.assertTrue(() -> list.get(finalI).getSeq() < list.get(finalI+1).getSeq());
+                    Assertions.assertTrue(() -> list.get(finalI).getSendTime().isBefore(list.get(finalI+1).getSendTime()));
+                }
+                currentSeq = list.get(0).getSeq();
+            }
+
         } finally {
             for(long i=0; i<chatHistoryNumber; i++) {
                 chatHistoryRepository.deleteBySeq(i);
