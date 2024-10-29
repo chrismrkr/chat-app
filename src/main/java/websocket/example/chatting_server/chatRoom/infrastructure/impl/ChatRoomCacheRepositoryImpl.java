@@ -28,9 +28,9 @@ public class ChatRoomCacheRepositoryImpl implements ChatRoomCacheRepository {
     public ChatHistory writeChatHistory(Long roomId, ChatHistory chatHistory) {
         String key = CHAT_ROOM_HISTORY_CACHE_PREFIX + Long.toString(roomId);
         RDeque<ChatHistory> chatHistoryCache = redissonClient.getDeque(key);
-        chatHistoryCache.addFirst(chatHistory);
+        chatHistoryCache.addLast(chatHistory);
         if(chatHistoryCache.size() > MAX_CACHE_SIZE) {
-            chatHistoryCache.removeLast();
+            chatHistoryCache.removeFirst();
         }
         return chatHistory;
     }

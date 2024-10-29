@@ -2,6 +2,7 @@ package websocket.example.chatting_server.chatRoom.infrastructure.impl;
 
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 import websocket.example.chatting_server.chatRoom.domain.ChatHistory;
@@ -20,9 +21,12 @@ public class ChatHistoryRepositoryImpl implements ChatHistoryRepository {
 
     @Override
     public List<ChatHistory> findByRoomIdAndSeqLessThan(Long roomId, Long currentSeq, int size) {
-        List<ChatHistoryEntity> byRoomIdAndSeqLessThan = chatHistoryEsRepository.findByRoomIdAndSeqLessThan(roomId, currentSeq, Pageable.ofSize(100));
+        List<ChatHistoryEntity> byRoomIdAndSeqLessThan = chatHistoryEsRepository
+                .findByRoomIdAndSeqLessThanOrderBySeqDesc(roomId, currentSeq, PageRequest.of(0, size));
+
         return byRoomIdAndSeqLessThan.stream()
                 .map(ChatHistory::from)
+                .sorted((h1, h2) -> h1.getSeq() < h2.getSeq() ? -1 : 1)
                 .toList();
     }
 

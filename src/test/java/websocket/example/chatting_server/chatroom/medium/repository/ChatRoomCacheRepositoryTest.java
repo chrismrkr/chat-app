@@ -149,7 +149,11 @@ public class ChatRoomCacheRepositoryTest {
             // then
             List<ChatHistory> chatHistories = chatRoomCacheRepository.readChatHistory(roomId);
             Assertions.assertEquals(chatHistories.size(), 100);
-            Assertions.assertEquals(chatHistories.get(MAX_CACHE_SIZE - 1).getSeq(), 5);
+            Assertions.assertEquals(chatHistories.get(MAX_CACHE_SIZE - 1).getSeq(), MAX_CACHE_SIZE + 5 - 1);
+            for(int i=0; i<chatHistories.size()-1; i++) {
+                Assertions.assertTrue(chatHistories.get(i).getSeq() < chatHistories.get(i+1).getSeq());
+                Assertions.assertTrue(chatHistories.get(i).getSendTime().isBefore(chatHistories.get(i+1).getSendTime()));
+            }
         } finally {
             RBucket<Object> bucket = redissonClient.getBucket("CHAT_ROOM_HISTORY_CACHE_" + Long.toString(roomId));
             bucket.delete();
