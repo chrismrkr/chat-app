@@ -21,6 +21,7 @@ import websocket.example.chatting_server.chatRoom.infrastructure.ChatRoomReposit
 import websocket.example.chatting_server.chatRoom.infrastructure.MemberChatRoomRepository;
 import websocket.example.chatting_server.chatRoom.service.ChatRoomService;
 
+import java.sql.SQLIntegrityConstraintViolationException;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.CountDownLatch;
@@ -100,7 +101,7 @@ public class ChatRoomServiceTest {
     }
 
     @Test
-    void chatroom_퇴장() {
+    void chatroom_퇴장() throws SQLIntegrityConstraintViolationException {
         // given
         String roomName = "room3";
         Long memberId = 3L;
@@ -132,7 +133,7 @@ public class ChatRoomServiceTest {
     }
 
     @Test
-    void chatroom_퇴장_시_남은_인원이_없으면_채팅방_자동_삭제() {
+    void chatroom_퇴장_시_남은_인원이_없으면_채팅방_자동_삭제() throws SQLIntegrityConstraintViolationException {
         // given
         String roomName = "room4";
         Long memberId = 5L;
@@ -153,13 +154,8 @@ public class ChatRoomServiceTest {
         chatRoomService.exit(newMemberId, chatRoom.getRoomId());
 
         // then
-        Assertions.assertEquals(memberChatRoomRepository.findByRoomIdWithChatRoom(chatRoom.getRoomId()).size(), 0);
-        Awaitility.await()
-                .atMost(10, TimeUnit.SECONDS)
-                .untilAsserted(() -> {
-                    Optional<ChatRoom> byId = chatRoomRepository.findById(chatRoom.getRoomId());
-                    Assertions.assertEquals(byId, Optional.empty());
-                });
+        Optional<ChatRoom> byId = chatRoomRepository.findById(chatRoom.getRoomId());
+        Assertions.assertTrue(byId.isEmpty());
     }
 
     @Test
@@ -258,7 +254,7 @@ public class ChatRoomServiceTest {
     }
 
     @Test
-    void chatroom에서_동시에_모두_퇴장해도_정상적으로_chatroom이_삭제됨() throws InterruptedException {
+    void chatroom에서_동시에_모두_퇴장해도_정상적으로_chatroom이_삭제됨() throws InterruptedException, SQLIntegrityConstraintViolationException {
         // given
         String roomName = "room14";
         Long memberId = 16L;
@@ -284,14 +280,10 @@ public class ChatRoomServiceTest {
         }
 
         countDownLatch.await();
-        List<MemberChatRoom> byRoomId = memberChatRoomRepository.findByRoomIdWithChatRoom(chatRoom.getRoomId());
-        Assertions.assertEquals(byRoomId.size(), 0);
-        Awaitility.await()
-                .atMost(10, TimeUnit.SECONDS)
-                .untilAsserted(() -> {
-                    Optional<ChatRoom> byId = chatRoomRepository.findById(chatRoom.getRoomId());
-                    Assertions.assertEquals(byId, Optional.empty());
-                });
+        List<MemberChatRoom> byRoomId = memberChatRoomRepository.findByRoomId(chatRoom.getRoomId());
+        Assertions.assertTrue(byRoomId.isEmpty());
+        Optional<ChatRoom> byId = chatRoomRepository.findById(chatRoom.getRoomId());
+        Assertions.assertTrue(byId.isEmpty());
     }
 
     @Test

@@ -7,4 +7,5 @@ import websocket.example.chatting_server.chatRoom.service.event.ChatRoomExitEven
 public interface ChatRoomEventHandler {
     void publishEmptyCheck(ChatRoomExitEvent event);
     void subscribeEmptyCheck(ConsumerRecord<Long, Long> record, Acknowledgment acknowledgment);
+    void checkEmpty(Long roomId);
 }

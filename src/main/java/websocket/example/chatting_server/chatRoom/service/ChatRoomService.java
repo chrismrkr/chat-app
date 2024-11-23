@@ -5,6 +5,7 @@ import websocket.example.chatting_server.chatRoom.domain.ChatHistory;
 import websocket.example.chatting_server.chatRoom.domain.ChatRoom;
 import websocket.example.chatting_server.chatRoom.domain.MemberChatRoom;
 
+import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.List;
 
 public interface ChatRoomService {

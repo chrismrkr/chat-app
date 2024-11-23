@@ -31,4 +31,12 @@ public class MockChatRoomEventHandler implements ChatRoomEventHandler {
     public void subscribeEmptyCheck(ConsumerRecord<Long, Long> record, Acknowledgment acknowledgment) {
 
     }
+
+    @Override
+    public void checkEmpty(Long roomId) {
+        List<MemberChatRoom> byRoomId = memberChatRoomRepository.findByRoomId(roomId);
+        if(byRoomId.isEmpty()) {
+            chatRoomRepository.delete(roomId);
+        }
+    }
 }

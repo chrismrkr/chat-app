@@ -12,6 +12,8 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
 import websocket.example.chatting_server.chat.utils.KafkaConsumerConfigUtils;
@@ -47,7 +49,7 @@ public class ChatRoomEventHandlerImpl implements ChatRoomEventHandler {
     }
 
     @Override
-    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+//    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void publishEmptyCheck(ChatRoomExitEvent chatRoomExitEvent) {
         String topicName = chatRoomEmptyCheckConsumerConfig.getTopicName();
         Long roomId = chatRoomExitEvent.getRoomId();
@@ -55,11 +57,11 @@ public class ChatRoomEventHandlerImpl implements ChatRoomEventHandler {
     }
 
     @Override
-    @KafkaListener(
-            topics = {"#{chatRoomEmptyCheckConsumerConfig.topicName}"},
-            groupId = "#{chatRoomEmptyCheckConsumerConfig.groupId}",
-            containerFactory = "chatRoomEmptyCheckKafkaListenerContainerFactory"
-    )
+//    @KafkaListener(
+//            topics = {"#{chatRoomEmptyCheckConsumerConfig.topicName}"},
+//            groupId = "#{chatRoomEmptyCheckConsumerConfig.groupId}",
+//            containerFactory = "chatRoomEmptyCheckKafkaListenerContainerFactory"
+//    )
     public void subscribeEmptyCheck(ConsumerRecord<Long, Long> record, Acknowledgment acknowledgment) {
         Long roomId = record.value();
         List<MemberChatRoom> participants = memberChatRoomRepository.findByRoomId(roomId);
@@ -68,5 +70,18 @@ public class ChatRoomEventHandlerImpl implements ChatRoomEventHandler {
             chatRoomRepository.delete(roomId);
         }
         acknowledgment.acknowledge();
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void checkEmpty(Long roomId) {
+        List<MemberChatRoom> participants = memberChatRoomRepository.findByRoomId(roomId);
+        if(!participants.isEmpty())
+            return;
+        try {
+            chatRoomRepository.delete(roomId);
+        } catch (Exception e) {
+            throw new RuntimeException("[ERROR] CHATROOM DELETE FAILED");
+        }
     }
 }

@@ -9,8 +9,10 @@ import websocket.example.chatting_server.chatRoom.service.ChatRoomService;
 import websocket.example.chatting_server.chatRoom.domain.ChatRoom;
 import websocket.example.chatting_server.chatRoom.service.event.ChatRoomExitEvent;
 import websocket.example.chatting_server.chatRoom.service.impl.ChatRoomServiceImpl;
+import websocket.example.chatting_server.chatRoom.service.inner.ChatRoomInnerService;
 import websocket.example.chatting_server.chatroom.unit.service.mock.*;
 
+import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.List;
 import java.util.Optional;
 
@@ -19,23 +21,12 @@ public class ChatRoomServiceTest {
     MemberChatRoomRepository memberChatRoomRepository = new MockMemberChatRoomRepository();
     ChatHistoryRepository chatHistoryRepository = new MockChatHistoryRepository();
     ChatRoomCacheRepository chatRoomCacheRepository = new MockChatRoomCacheRepository();
-    //    ChatRoomEventHandler chatRoomEventHandler = new MockChatRoomEventHandler(chatRoomRepository, memberChatRoomRepository);
-    ApplicationEventPublisher eventPublisher = new ApplicationEventPublisher() {
-    @Override
-    public void publishEvent(Object event) {
-        ChatRoomExitEvent exitEvent = (ChatRoomExitEvent) event;
-        Long roomId = exitEvent.getRoomId();
-        List<MemberChatRoom> byRoomId = memberChatRoomRepository.findByRoomId(roomId);
-        if(byRoomId.isEmpty()) {
-            chatRoomRepository.delete(roomId);
-        }
-    }
-    };
+    ChatRoomInnerService chatRoomInnerService = new MockChatRoomInnerService(chatRoomRepository, memberChatRoomRepository);
     ChatRoomService chatRoomService = new ChatRoomServiceImpl(chatRoomRepository,
             memberChatRoomRepository,
             chatHistoryRepository,
             chatRoomCacheRepository,
-            eventPublisher
+            chatRoomInnerService
             );
     @Test
     void chatRoom_생성() {
@@ -98,7 +89,7 @@ public class ChatRoomServiceTest {
     }
 
     @Test
-    void 사용자의_chatroom_퇴장() {
+    void 사용자의_chatroom_퇴장() throws SQLIntegrityConstraintViolationException {
         // given
         String roomName = "room5";
         Long memberId = 7L;
@@ -116,7 +107,7 @@ public class ChatRoomServiceTest {
     }
 
     @Test
-    void 사용자_chatroom_퇴장_후_남은_인원이_없으면_채팅방을_삭제함() {
+    void 사용자_chatroom_퇴장_후_남은_인원이_없으면_채팅방을_삭제함() throws SQLIntegrityConstraintViolationException {
         // given
         String roomName = "room6";
         Long memberId = 9L;

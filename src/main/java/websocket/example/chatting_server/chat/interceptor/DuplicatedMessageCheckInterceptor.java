@@ -52,6 +52,7 @@ public class DuplicatedMessageCheckInterceptor implements ChannelInterceptor {
             if(!isReliableSequence(receiverSessionId, senderSessionId, chatDto.getSeq())) {
                 // 이미 전송 완료된 메세지 Sequence
                 Long exSeq = outboundChannelHistoryRepository.getSequence(receiverSessionId, senderSessionId);
+                // TODO. throw 시 웹 소켓 세션이 종료되므로 세션이 끊기지 않는 쪽으로 변경 필요
                 throw new IllegalArgumentException("[MESSAGE SEND ERROR] MESSAGE SEQUENCE INVALID :"
                         + "current: "+ chatDto.getSeq() + " , " + "ex : " + exSeq);
             }

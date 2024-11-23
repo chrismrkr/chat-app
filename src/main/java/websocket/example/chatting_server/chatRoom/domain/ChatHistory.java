@@ -3,6 +3,7 @@ package websocket.example.chatting_server.chatRoom.domain;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import websocket.example.chatting_server.chat.controller.dto.ChatDto;
 import websocket.example.chatting_server.chatRoom.infrastructure.entity.ChatHistoryEntity;
 
@@ -10,14 +11,15 @@ import java.time.LocalDateTime;
 
 @Getter
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@NoArgsConstructor
 public class ChatHistory {
     @EqualsAndHashCode.Include
     private Long seq;
     @EqualsAndHashCode.Include
-    private final Long roomId;
-    private final String senderName;
-    private final String message;
-    private final LocalDateTime sendTime;
+    private Long roomId;
+    private String senderName;
+    private String message;
+    private LocalDateTime sendTime;
 
     @Builder
     public ChatHistory(Long seq, Long roomId, String senderName, String message, LocalDateTime sendTime) {

@@ -10,6 +10,7 @@ import websocket.example.chatting_server.chatRoom.domain.MemberChatRoom;
 import websocket.example.chatting_server.chatRoom.service.ChatRoomService;
 import websocket.example.chatting_server.chatRoom.domain.ChatRoom;
 
+import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.List;
 
 @RestController
@@ -36,7 +37,7 @@ public class ChatRoomController {
     }
 
     @PostMapping("/exit")
-    public ResponseEntity<ChatRoomEnterResDto> handleExit(@RequestBody ChatRoomEnterReqDto dto) {
+    public ResponseEntity<ChatRoomEnterResDto> handleExit(@RequestBody ChatRoomEnterReqDto dto) throws SQLIntegrityConstraintViolationException {
         chatRoomService.exit(dto.getMemberId(), dto.getRoomId());
         ChatRoomEnterResDto res = ChatRoomEnterResDto.builder()
                 .status("EXIT")
