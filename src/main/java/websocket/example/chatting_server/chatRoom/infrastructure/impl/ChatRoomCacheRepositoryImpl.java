@@ -14,6 +14,7 @@ import websocket.example.chatting_server.chatRoom.infrastructure.ChatRoomCacheRe
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 @Repository
 @Slf4j
@@ -39,16 +40,23 @@ public class ChatRoomCacheRepositoryImpl implements ChatRoomCacheRepository {
     @Override
     public ChatHistory writeChatHistory(Long roomId, ChatHistory chatHistory) {
         String key = CHAT_ROOM_HISTORY_CACHE_PREFIX + Long.toString(roomId);
-        chatHistoryRedisTemplate.opsForList().leftPush(key, chatHistory);
-        chatHistoryRedisTemplate.opsForList().trim(key, 0, MAX_CACHE_SIZE-1);
+        chatHistoryRedisTemplate.opsForZSet().add(key, chatHistory, chatHistory.getSeq());
+        chatHistoryRedisTemplate.opsForZSet().removeRange(key, -1 * (MAX_CACHE_SIZE+1), -1 * (MAX_CACHE_SIZE+1));
         return chatHistory;
     }
 
     @Override
     public List<ChatHistory> readChatHistory(Long roomId) {
         String key = CHAT_ROOM_HISTORY_CACHE_PREFIX + Long.toString(roomId);
-        List<ChatHistory> histories = chatHistoryRedisTemplate.opsForList().range(key, 0, -1);
-        Collections.reverse(Objects.requireNonNull(histories));
+        List<ChatHistory> histories = chatHistoryRedisTemplate.opsForZSet()
+                .range(key, 0, -1)
+                        .stream().toList();
         return histories;
+    }
+
+    @Override
+    public void deleteChatHistory(Long roomId, Long seq) {
+        String key = CHAT_ROOM_HISTORY_CACHE_PREFIX + Long.toString(roomId);
+        chatHistoryRedisTemplate.opsForZSet().removeRangeByScore(key, seq, seq);
     }
 }

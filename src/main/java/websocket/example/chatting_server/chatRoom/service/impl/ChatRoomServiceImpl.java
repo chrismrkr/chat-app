@@ -90,8 +90,14 @@ public class ChatRoomServiceImpl implements ChatRoomService {
         ChatRoom chatRoom = chatRoomRepository.findById(chatDto.getRoomId()).orElseThrow
                 (() -> new IllegalArgumentException("[INVALID ROOM ID]: ROOM NOT FOUND BY " + chatDto.getRoomId()));
         ChatHistory chatHistory = chatRoom.createChatHistory(chatDto);
-        chatHistory = chatRoomCacheRepository.writeChatHistory(roomId, chatHistory);
-        chatHistory = chatHistoryRepository.save(chatHistory);
+        try {
+            chatHistory = chatRoomCacheRepository.writeChatHistory(roomId, chatHistory);
+            chatHistory = chatHistoryRepository.save(chatHistory);
+        } catch (Exception e) {
+            chatHistoryRepository.deleteBySeq(chatHistory.getSeq());
+            chatRoomCacheRepository.deleteChatHistory(roomId, chatHistory.getSeq());
+            throw e;
+        }
         return chatHistory;
     }
 

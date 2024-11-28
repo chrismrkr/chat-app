@@ -6,9 +6,11 @@ import websocket.example.chatting_server.chatRoom.infrastructure.ChatRoomCacheRe
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
 public class MockChatRoomCacheRepository implements ChatRoomCacheRepository {
-    private List<ChatHistory> chatHistoryCache = new ArrayList<>();
+    private Set<ChatHistory> chatHistoryCache = new TreeSet<>();
 
     @Override
     public RLock getChatRoomHistoryLock(Long roomId) {
@@ -23,5 +25,10 @@ public class MockChatRoomCacheRepository implements ChatRoomCacheRepository {
     @Override
     public List<ChatHistory> readChatHistory(Long roomId) {
         return List.of();
+    }
+
+    @Override
+    public void deleteChatHistory(Long roomId, Long seq) {
+        return;
     }
 }

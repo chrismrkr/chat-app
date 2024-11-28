@@ -159,4 +159,60 @@ public class ChatRoomCacheRepositoryTest {
             bucket.delete();
         }
     }
+
+    @Test
+    void 동일한_ChatHistory를_중복해서_저장해도_1개만_저장된다() {
+        // given
+        Long roomId = 6L;
+        int MAX_CACHE_SIZE = 100;
+        try {
+            // when
+            long fixedSeq = 412341231;
+            for(int i=0; i<MAX_CACHE_SIZE + 5; i++) {
+                ChatHistory chatHistory = ChatHistory.builder()
+                        .roomId(roomId)
+                        .seq(fixedSeq)
+                        .senderName("kim")
+                        .message("hello1")
+                        .sendTime(LocalDateTime.now())
+                        .build();
+                chatRoomCacheRepository.writeChatHistory(roomId, chatHistory);
+            }
+            // then
+            List<ChatHistory> chatHistories = chatRoomCacheRepository.readChatHistory(roomId);
+            Assertions.assertEquals(chatHistories.size(), 1);
+        } finally {
+            RBucket<Object> bucket = redissonClient.getBucket("CHAT_ROOM_HISTORY_CACHE_" + Long.toString(roomId));
+            bucket.delete();
+        }
+    }
+
+    @Test
+    void ChatHistory를_seq로_삭제할_수_있다() {
+        // given
+        Long roomId = 7L;
+        int MAX_CACHE_SIZE = 100;
+        try {
+            // when
+            for(int i=0; i<MAX_CACHE_SIZE + 5; i++) {
+                ChatHistory chatHistory = ChatHistory.builder()
+                        .roomId(roomId)
+                        .seq((long)i)
+                        .senderName("kim")
+                        .message("hello1")
+                        .sendTime(LocalDateTime.now())
+                        .build();
+                chatRoomCacheRepository.writeChatHistory(roomId, chatHistory);
+            }
+            for(int i=0; i<MAX_CACHE_SIZE + 5; i++) {
+                chatRoomCacheRepository.deleteChatHistory(roomId, (long)i);
+            }
+            // then
+            List<ChatHistory> chatHistories = chatRoomCacheRepository.readChatHistory(roomId);
+            Assertions.assertEquals(chatHistories.size(), 0);
+        } finally {
+            RBucket<Object> bucket = redissonClient.getBucket("CHAT_ROOM_HISTORY_CACHE_" + Long.toString(roomId));
+            bucket.delete();
+        }
+    }
 }

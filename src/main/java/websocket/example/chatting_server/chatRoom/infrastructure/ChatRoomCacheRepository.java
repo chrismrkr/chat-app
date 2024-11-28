@@ -10,4 +10,5 @@ public interface ChatRoomCacheRepository {
     RLock getChatRoomHistoryLock(Long roomId);
     ChatHistory writeChatHistory(Long roomId, ChatHistory chatHistory);
     List<ChatHistory> readChatHistory(Long roomId);
+    void deleteChatHistory(Long roomId, Long seq);
 }
