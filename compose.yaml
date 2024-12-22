@@ -37,7 +37,6 @@ services:
       - chat-app-rabbitmq
       - chat-app-redis
       - chat-app-es
-      - chat-app-kafka
     restart: always
 
   chat-app-backend2:
@@ -65,7 +64,6 @@ services:
       - chat-app-rabbitmq
       - chat-app-redis
       - chat-app-es
-      - chat-app-kafka
     restart: always
 
   chat-app-rabbitmq:
@@ -114,26 +112,26 @@ services:
       - 9200:9200 # https
       - 9300:9300 #tcp
 
-  chat-app-zookeeper:
-    image: wurstmeister/zookeeper:latest
-    container_name: chat-app-zookeeper
-    ports:
-     - "2181:2181"
-
-  chat-app-kafka:
-    image: wurstmeister/kafka:latest
-    container_name: chat-app-kafka
-    ports:
-      - "9092:9092"
-    environment:
-      KAFKA_BROKER_ID: 1
-      KAFKA_ZOOKEEPER_CONNECT: chat-app-zookeeper:2181
-      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092  # Kafka 브로커가 대기할 인터페이스 설정
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://chat-app-kafka:9092  # 외부 클라이언트가 접근할 Kafka 브로커 주소
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-    depends_on:
-      - chat-app-zookeeper
+#  chat-app-zookeeper:
+#    image: wurstmeister/zookeeper:latest
+#    container_name: chat-app-zookeeper
+#    ports:
+#     - "2181:2181"
+#
+#  chat-app-kafka:
+#    image: wurstmeister/kafka:latest
+#    container_name: chat-app-kafka
+#    ports:
+#      - "9092:9092"
+#    environment:
+#      KAFKA_BROKER_ID: 1
+#      KAFKA_ZOOKEEPER_CONNECT: chat-app-zookeeper:2181
+#      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092  # Kafka 브로커가 대기할 인터페이스 설정
+#      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://chat-app-kafka:9092  # 외부 클라이언트가 접근할 Kafka 브로커 주소
+#      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT
+#      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+#    depends_on:
+#      - chat-app-zookeeper
 
   chat-app-frontend:
     image: chat-app-frontend:latest
